@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixShare - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e17;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #d2a8ff;
+        }
+
+        .navbar .logo span {
+            color: #f778ba;
+        }
+
+        .navbar .badge {
+            background-color: #da3633;
+            color: #ffffff;
+            font-size: 0.7em;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            vertical-align: super;
+        }
+
+        .navbar nav a {
+            color: #8b949e;
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+
+        .navbar nav a:hover {
+            color: #d2a8ff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 48px 32px;
+        }
+
+        h1 {
+            color: #e6edf3;
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 32px;
+        }
+
+        .warning-box {
+            background-color: #1c1206;
+            border: 1px solid #9e6a03;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 32px;
+            font-size: 0.9em;
+            color: #e3b341;
+        }
+
+        .warning-box strong {
+            color: #f0c040;
+        }
+
+        .panel-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .panel-card h2 {
+            color: #e6edf3;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+        }
+
+        .panel-card p {
+            color: #8b949e;
+            font-size: 0.9em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .execute-form {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .execute-form input[type="text"] {
+            flex: 1;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .execute-form input[type="text"]::placeholder {
+            color: #484f58;
+        }
+
+        .execute-form input[type="text"]:focus {
+            outline: none;
+            border-color: #8957e5;
+            box-shadow: 0 0 0 2px rgba(137, 87, 229, 0.2);
+        }
+
+        .btn-execute {
+            background-color: #da3633;
+            color: #ffffff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-execute:hover {
+            background-color: #f85149;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+
+        .info-table tr {
+            border-bottom: 1px solid #21262d;
+        }
+
+        .info-table td {
+            padding: 10px 0;
+        }
+
+        .info-table td:first-child {
+            color: #8b949e;
+            width: 160px;
+        }
+
+        .info-table td:last-child {
+            color: #c9d1d9;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95em;
+        }
+
+        .api-docs {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            color: #8b949e;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .api-docs .method {
+            color: #7ee787;
+            font-weight: bold;
+        }
+
+        .api-docs .path {
+            color: #d2a8ff;
+        }
+
+        .api-docs .param {
+            color: #ffa657;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: #484f58;
+            font-size: 0.85em;
+            border-top: 1px solid #21262d;
+            margin-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Pix<span>Share</span> <span class="badge">ADMIN</span></div>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/gallery">Gallery</a>
+            <a href="/admin">Admin</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h1>Admin Panel</h1>
+        <p class="subtitle">Internal development tools and system diagnostics.</p>
+
+        <div class="warning-box">
+            <strong>Development Only:</strong> This panel is intended for internal use
+            during development. Do not expose in production.
+        </div>
+
+        <!-- Script Runner -->
+        <div class="panel-card">
+            <h2>Script Runner</h2>
+            <p>Execute a server-side Python script for maintenance or diagnostics.
+               Provide the full filesystem path to a <code>.py</code> file.</p>
+
+            <form class="execute-form" action="/admin/execute" method="GET">
+                <input type="text" name="file" placeholder="/app/uploads/script.py" autocomplete="off">
+                <button type="submit" class="btn-execute">Execute</button>
+            </form>
+        </div>
+
+        <!-- System Info -->
+        <div class="panel-card">
+            <h2>System Information</h2>
+            <table class="info-table">
+                <tr>
+                    <td>Upload Directory</td>
+                    <td>/app/uploads/</td>
+                </tr>
+                <tr>
+                    <td>Max Upload Size</td>
+                    <td>16 MB</td>
+                </tr>
+                <tr>
+                    <td>Allowed Extensions</td>
+                    <td>* (no restrictions)</td>
+                </tr>
+                <tr>
+                    <td>Server User</td>
+                    <td>webapp</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- API Reference -->
+        <div class="panel-card">
+            <h2>API Reference</h2>
+            <div class="api-docs">
+                <span class="method">POST</span> <span class="path">/upload</span> - Upload a file (multipart form, field: <span class="param">file</span>)<br>
+                <span class="method">GET</span>&nbsp; <span class="path">/uploads/&lt;filename&gt;</span> - Retrieve an uploaded file<br>
+                <span class="method">GET</span>&nbsp; <span class="path">/admin/execute?<span class="param">file</span>=&lt;path&gt;</span> - Run a Python script on the server
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        PixShare Admin v1.2.0 &mdash; Internal Use Only
+    </div>
+</body>
+</html>

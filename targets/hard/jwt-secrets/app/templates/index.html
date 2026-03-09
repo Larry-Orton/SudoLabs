@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaultAPI - Secure Document Vault</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e17;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+            border-bottom: 1px solid #30363d;
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #58a6ff;
+            font-size: 2.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .header .subtitle {
+            color: #8b949e;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .header .version {
+            color: #3fb950;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            font-family: monospace;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #1c2128;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #30363d;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e6edf3;
+        }
+
+        .section-body {
+            padding: 1.5rem;
+        }
+
+        .endpoint {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .endpoint:hover {
+            border-color: #58a6ff;
+        }
+
+        .endpoint:last-child {
+            margin-bottom: 0;
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .method-get {
+            background: #0d419d;
+            color: #79c0ff;
+        }
+
+        .method-post {
+            background: #1a4731;
+            color: #3fb950;
+        }
+
+        .path {
+            font-family: monospace;
+            font-size: 0.95rem;
+            color: #e6edf3;
+            font-weight: 500;
+        }
+
+        .auth-badge {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .auth-required {
+            background: #4d2d00;
+            color: #d29922;
+        }
+
+        .auth-public {
+            background: #1a4731;
+            color: #3fb950;
+        }
+
+        .endpoint-desc {
+            color: #8b949e;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .endpoint-body {
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: #161b22;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: #7ee787;
+        }
+
+        .quick-start {
+            line-height: 1.8;
+        }
+
+        .quick-start code {
+            background: #0d1117;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #79c0ff;
+            border: 1px solid #21262d;
+        }
+
+        .quick-start pre {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            color: #c9d1d9;
+            line-height: 1.6;
+        }
+
+        .quick-start pre .comment {
+            color: #8b949e;
+        }
+
+        .quick-start pre .string {
+            color: #a5d6ff;
+        }
+
+        .quick-start pre .cmd {
+            color: #7ee787;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #484f58;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>VaultAPI</h1>
+        <div class="subtitle">Secure Document Vault REST API</div>
+        <div class="version">v1.4.2 | JWT-Authenticated | HS256</div>
+    </div>
+
+    <div class="container">
+        <!-- API Endpoints -->
+        <div class="section">
+            <div class="section-header">API Endpoints</div>
+            <div class="section-body">
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="path">/api/docs</span>
+                        <span class="auth-badge auth-public">Public</span>
+                    </div>
+                    <div class="endpoint-desc">List all available API endpoints with descriptions and parameters.</div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="path">/api/register</span>
+                        <span class="auth-badge auth-public">Public</span>
+                    </div>
+                    <div class="endpoint-desc">Register a new user account and receive a JWT access token.</div>
+                    <div class="endpoint-body">{ "username": "string", "password": "string" }</div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="path">/api/login</span>
+                        <span class="auth-badge auth-public">Public</span>
+                    </div>
+                    <div class="endpoint-desc">Authenticate with credentials and receive a JWT access token.</div>
+                    <div class="endpoint-body">{ "username": "string", "password": "string" }</div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="path">/api/profile</span>
+                        <span class="auth-badge auth-required">Auth Required</span>
+                    </div>
+                    <div class="endpoint-desc">View your user profile and JWT claims. Requires valid Bearer token.</div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="path">/api/vault</span>
+                        <span class="auth-badge auth-required">Auth Required</span>
+                    </div>
+                    <div class="endpoint-desc">List documents in the vault. Admin role reveals additional classified documents.</div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-get">GET</span>
+                        <span class="path">/admin</span>
+                        <span class="auth-badge auth-required">Admin Only</span>
+                    </div>
+                    <div class="endpoint-desc">Admin dashboard. Requires JWT with <code>role: "admin"</code> claim.</div>
+                </div>
+
+                <div class="endpoint">
+                    <div class="endpoint-header">
+                        <span class="method method-post">POST</span>
+                        <span class="path">/admin/greeting</span>
+                        <span class="auth-badge auth-required">Admin Only</span>
+                    </div>
+                    <div class="endpoint-desc">Set a custom greeting message template for the admin panel.</div>
+                    <div class="endpoint-body">template=Hello {{ username }}, welcome back!</div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Quick Start -->
+        <div class="section">
+            <div class="section-header">Quick Start</div>
+            <div class="section-body quick-start">
+                <p>1. Register an account:</p>
+                <pre><span class="cmd">curl</span> -X POST http://localhost:8080/api/register \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{"username": "myuser", "password": "mypass"}'</span></pre>
+
+                <p>2. Copy the <code>token</code> from the response.</p>
+
+                <p>3. Access authenticated endpoints:</p>
+                <pre><span class="cmd">curl</span> http://localhost:8080/api/profile \
+  -H <span class="string">"Authorization: Bearer &lt;your-token&gt;"</span></pre>
+
+                <p>4. Explore the vault:</p>
+                <pre><span class="cmd">curl</span> http://localhost:8080/api/vault \
+  -H <span class="string">"Authorization: Bearer &lt;your-token&gt;"</span></pre>
+            </div>
+        </div>
+
+        <!-- Authentication Info -->
+        <div class="section">
+            <div class="section-header">Authentication</div>
+            <div class="section-body">
+                <p style="line-height: 1.7;">
+                    VaultAPI uses <strong>JSON Web Tokens (JWT)</strong> with the <strong>HS256</strong> algorithm
+                    for authentication. After registering or logging in, include the token in the
+                    <code style="background: #0d1117; padding: 0.2rem 0.5rem; border-radius: 4px; color: #79c0ff; border: 1px solid #21262d;">Authorization</code>
+                    header as a Bearer token.
+                </p>
+                <p style="margin-top: 0.75rem; color: #8b949e; line-height: 1.7;">
+                    Tokens expire after 24 hours. The JWT payload includes the
+                    <code style="background: #0d1117; padding: 0.2rem 0.5rem; border-radius: 4px; color: #79c0ff; border: 1px solid #21262d;">user</code> and
+                    <code style="background: #0d1117; padding: 0.2rem 0.5rem; border-radius: 4px; color: #79c0ff; border: 1px solid #21262d;">role</code>
+                    claims for authorization.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        VaultAPI v1.4.2 &mdash; Internal Use Only &mdash; Authorized Personnel
+    </div>
+</body>
+</html>

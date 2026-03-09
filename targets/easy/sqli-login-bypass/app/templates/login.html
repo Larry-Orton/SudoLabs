@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Corp - Employee Portal Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e17;
+            color: #c8ccd4;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(16, 45, 90, 0.4) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(30, 60, 114, 0.3) 0%, transparent 50%);
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, #1e3a6e, #2b5797);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #5ba0f5;
+            border: 1px solid rgba(91, 160, 245, 0.2);
+        }
+
+        .logo-section h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #e4e7ed;
+            letter-spacing: 1px;
+        }
+
+        .logo-section p {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .login-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .login-card h2 {
+            font-size: 18px;
+            color: #e4e7ed;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #9ca3af;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #0d1117;
+            border: 1px solid #2d3748;
+            border-radius: 8px;
+            color: #e4e7ed;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .form-group input::placeholder {
+            color: #4b5563;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 11px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 11px;
+            color: #4b5563;
+        }
+
+        .security-notice {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 11px;
+            color: #374151;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <div class="logo-icon">N</div>
+            <h1>NEXUS CORP</h1>
+            <p>Employee Portal v3.2.1</p>
+        </div>
+
+        <div class="login-card">
+            <h2>Sign In</h2>
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/login">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username"
+                           placeholder="Enter your username" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password"
+                           placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="submit-btn">Authenticate</button>
+            </form>
+        </div>
+
+        <p class="footer-text">
+            Nexus Corp Internal Systems &mdash; Authorized Personnel Only
+        </p>
+        <p class="security-notice">
+            All access attempts are logged and monitored.
+        </p>
+    </div>
+</body>
+</html>

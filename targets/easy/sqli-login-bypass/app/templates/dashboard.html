@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Corp - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e17;
+            color: #c8ccd4;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1e3a6e, #2b5797);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #5ba0f5;
+        }
+
+        .nav-brand span {
+            font-weight: 600;
+            color: #e4e7ed;
+            font-size: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #e4e7ed;
+        }
+
+        .nav-links a.active {
+            color: #3b82f6;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 20px;
+            font-size: 12px;
+            color: #93c5fd;
+        }
+
+        .main-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #111827, #1a2332);
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 24px;
+        }
+
+        .welcome-banner h1 {
+            font-size: 22px;
+            color: #e4e7ed;
+            margin-bottom: 6px;
+        }
+
+        .welcome-banner p {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .flag-card {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .flag-card h3 {
+            color: #34d399;
+            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .flag-value {
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            color: #6ee7b7;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 14px;
+            border-radius: 6px;
+            word-break: break-all;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .stat-card h3 {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #e4e7ed;
+        }
+
+        .stat-card .sub {
+            font-size: 12px;
+            color: #4b5563;
+            margin-top: 4px;
+        }
+
+        .quick-links {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .quick-links h3 {
+            font-size: 15px;
+            color: #e4e7ed;
+            margin-bottom: 16px;
+        }
+
+        .quick-links ul {
+            list-style: none;
+        }
+
+        .quick-links li {
+            margin-bottom: 10px;
+        }
+
+        .quick-links a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .quick-links a:hover {
+            text-decoration: underline;
+        }
+
+        .quick-links .desc {
+            font-size: 12px;
+            color: #4b5563;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="nav-brand-icon">N</div>
+            <span>NEXUS CORP</span>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard" class="active">Dashboard</a>
+            <a href="/search">Employee Search</a>
+            <div class="user-badge">{{ username }} ({{ role }})</div>
+            <a href="/logout">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="welcome-banner">
+            <h1>Welcome back, {{ username }}</h1>
+            <p>Nexus Corp Employee Portal &mdash; Internal use only. All activity is monitored.</p>
+        </div>
+
+        {% if user_flag %}
+        <div class="flag-card">
+            <h3>ACCESS GRANTED &mdash; Authentication Bypass Detected</h3>
+            <div class="flag-value">{{ user_flag }}</div>
+        </div>
+        {% endif %}
+
+        <div class="grid">
+            <div class="stat-card">
+                <h3>Active Projects</h3>
+                <div class="value">12</div>
+                <div class="sub">3 pending review</div>
+            </div>
+            <div class="stat-card">
+                <h3>Team Members</h3>
+                <div class="value">47</div>
+                <div class="sub">Across 6 departments</div>
+            </div>
+            <div class="stat-card">
+                <h3>Open Tickets</h3>
+                <div class="value">8</div>
+                <div class="sub">2 high priority</div>
+            </div>
+        </div>
+
+        <div class="quick-links">
+            <h3>Quick Access</h3>
+            <ul>
+                <li>
+                    <a href="/search">Employee Directory Search</a>
+                    <div class="desc">Search and browse employee records by name or department.</div>
+                </li>
+                <li>
+                    <a href="#">Project Management</a>
+                    <div class="desc">View and manage active project timelines.</div>
+                </li>
+                <li>
+                    <a href="#">IT Support Portal</a>
+                    <div class="desc">Submit support tickets and track resolutions.</div>
+                </li>
+                <li>
+                    <a href="#">HR Self-Service</a>
+                    <div class="desc">Time-off requests, pay stubs, benefits enrollment.</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

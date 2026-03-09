@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  webapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: webapp
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    labels:
+      - "howl.target=sqli-login-bypass"
+      - "howl.difficulty=easy"

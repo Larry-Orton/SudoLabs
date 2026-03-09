@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkLens - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e17;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar .logo {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+
+        .navbar .logo span {
+            color: #f0883e;
+        }
+
+        .navbar nav a {
+            color: #8b949e;
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+
+        .navbar nav a:hover,
+        .navbar nav a.active {
+            color: #58a6ff;
+        }
+
+        .admin-badge {
+            display: inline-block;
+            background-color: #da3633;
+            color: #ffffff;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 32px;
+        }
+
+        .page-title {
+            font-size: 1.8em;
+            color: #e6edf3;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: #8b949e;
+            font-size: 0.95em;
+            margin-bottom: 32px;
+        }
+
+        .panel {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .panel-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #30363d;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #e6edf3;
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background-color: #0d1117;
+            border-radius: 6px;
+            border: 1px solid #21262d;
+        }
+
+        .stat-item .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+
+        .stat-item .label {
+            font-size: 0.85em;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+
+        .status-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .status-form input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-size: 0.95em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .status-form input[type="text"]:focus {
+            border-color: #58a6ff;
+        }
+
+        .status-form input[type="text"]::placeholder {
+            color: #484f58;
+        }
+
+        .status-form button {
+            padding: 12px 24px;
+            background-color: #1f6feb;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .status-form button:hover {
+            background-color: #388bfd;
+        }
+
+        .status-output {
+            margin-top: 16px;
+            background-color: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .status-output pre {
+            color: #c9d1d9;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .error-msg {
+            color: #f08080;
+            background-color: #3d1a1a;
+            border: 1px solid #6e3030;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 0.9em;
+        }
+
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-table tr {
+            border-bottom: 1px solid #21262d;
+        }
+
+        .info-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .info-table td {
+            padding: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .info-table td:first-child {
+            color: #8b949e;
+            width: 180px;
+        }
+
+        .info-table td:last-child {
+            color: #e6edf3;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: #484f58;
+            font-size: 0.85em;
+            border-top: 1px solid #21262d;
+            margin-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Link<span>Lens</span> <span class="admin-badge">ADMIN</span></div>
+        <nav>
+            <a href="/">Preview</a>
+            <a href="/admin" class="active">Admin</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-subtitle">System administration and server diagnostics</p>
+
+        <!-- System Stats -->
+        <div class="panel">
+            <div class="panel-header">System Overview</div>
+            <div class="panel-body">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="value">1,247</div>
+                        <div class="label">URLs Previewed</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="value">3</div>
+                        <div class="label">Active Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="value">14d 6h</div>
+                        <div class="label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Server Info -->
+        <div class="panel">
+            <div class="panel-header">Server Information</div>
+            <div class="panel-body">
+                <table class="info-table">
+                    <tr>
+                        <td>Application</td>
+                        <td>LinkLens v2.3.1</td>
+                    </tr>
+                    <tr>
+                        <td>Runtime</td>
+                        <td>Python / Flask</td>
+                    </tr>
+                    <tr>
+                        <td>Internal API</td>
+                        <td>127.0.0.1:5000 (active)</td>
+                    </tr>
+                    <tr>
+                        <td>Database</td>
+                        <td>PostgreSQL @ localhost:5432</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Server Status Check -->
+        <div class="panel">
+            <div class="panel-header">Server Status Check</div>
+            <div class="panel-body">
+                <form class="status-form" action="/admin/status" method="GET">
+                    <input type="text" name="host" placeholder="Enter host IP (e.g., 127.0.0.1)" value="{{ status_host or '' }}" autocomplete="off" />
+                    <button type="submit">Check Status</button>
+                </form>
+
+                {% if status_error %}
+                <div class="error-msg">{{ status_error }}</div>
+                {% endif %}
+
+                {% if status_output %}
+                <div class="status-output">
+                    <pre>{{ status_output }}</pre>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        LinkLens v2.3.1 &mdash; Admin Panel &mdash; Authorized Personnel Only
+    </div>
+</body>
+</html>

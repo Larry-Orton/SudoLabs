@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixShare - Share Your Moments</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e17;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #d2a8ff;
+        }
+
+        .navbar .logo span {
+            color: #f778ba;
+        }
+
+        .navbar nav a {
+            color: #8b949e;
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+
+        .navbar nav a:hover,
+        .navbar nav a.active {
+            color: #d2a8ff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 32px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .hero h1 {
+            font-size: 2.2em;
+            color: #e6edf3;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            color: #8b949e;
+            font-size: 1.05em;
+            line-height: 1.6;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background-color: #161b22;
+            border: 2px dashed #30363d;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 48px;
+            transition: border-color 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: #d2a8ff;
+        }
+
+        .upload-section h2 {
+            color: #e6edf3;
+            font-size: 1.3em;
+            margin-bottom: 8px;
+        }
+
+        .upload-section p {
+            color: #8b949e;
+            font-size: 0.9em;
+            margin-bottom: 24px;
+        }
+
+        .upload-form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .upload-form input[type="file"] {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .upload-form input[type="file"]::file-selector-button {
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 12px;
+            font-size: 0.85em;
+            transition: background-color 0.2s;
+        }
+
+        .upload-form input[type="file"]::file-selector-button:hover {
+            background-color: #30363d;
+        }
+
+        .btn-upload {
+            background-color: #8957e5;
+            color: #ffffff;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-upload:hover {
+            background-color: #a371f7;
+        }
+
+        /* Gallery Section */
+        .gallery-section h2 {
+            color: #e6edf3;
+            font-size: 1.4em;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .gallery-item {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .gallery-item:hover {
+            border-color: #d2a8ff;
+            transform: translateY(-2px);
+        }
+
+        .gallery-item .preview {
+            width: 100%;
+            height: 160px;
+            background-color: #0d1117;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .gallery-item .preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .preview .file-icon {
+            font-size: 3em;
+            color: #30363d;
+        }
+
+        .gallery-item .info {
+            padding: 12px;
+        }
+
+        .gallery-item .info .filename {
+            color: #c9d1d9;
+            font-size: 0.85em;
+            word-break: break-all;
+            margin-bottom: 8px;
+        }
+
+        .gallery-item .info a {
+            color: #d2a8ff;
+            font-size: 0.8em;
+            text-decoration: none;
+        }
+
+        .gallery-item .info a:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 0;
+            color: #484f58;
+        }
+
+        .empty-state .icon {
+            font-size: 3em;
+            margin-bottom: 16px;
+        }
+
+        .empty-state p {
+            font-size: 1em;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: #484f58;
+            font-size: 0.85em;
+            border-top: 1px solid #21262d;
+            margin-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Pix<span>Share</span></div>
+        <nav>
+            <a href="/" class="active">Home</a>
+            <a href="/gallery">Gallery</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <div class="hero">
+            <h1>Share Your Moments</h1>
+            <p>Upload your favourite photos and share them with the world. Fast, free, and simple.</p>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="upload-section">
+            <h2>Upload a Photo</h2>
+            <p>Select an image file from your device to upload it to the gallery.</p>
+            <form class="upload-form" action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="file" required>
+                <button type="submit" class="btn-upload">Upload</button>
+            </form>
+        </div>
+
+        <!-- Gallery -->
+        <div class="gallery-section">
+            <h2>Recent Uploads</h2>
+
+            {% if files %}
+            <div class="gallery-grid">
+                {% for file in files %}
+                <div class="gallery-item">
+                    <div class="preview">
+                        {% if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg')) %}
+                            <img src="/uploads/{{ file }}" alt="{{ file }}" loading="lazy">
+                        {% else %}
+                            <div class="file-icon">&#128196;</div>
+                        {% endif %}
+                    </div>
+                    <div class="info">
+                        <div class="filename">{{ file }}</div>
+                        <a href="/uploads/{{ file }}" target="_blank">View File</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="icon">&#128247;</div>
+                <p>No photos uploaded yet. Be the first to share!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="footer">
+        PixShare v1.2.0 &mdash; Share Your World &mdash; &copy; 2024 PixShare Inc.
+    </div>
+</body>
+</html>

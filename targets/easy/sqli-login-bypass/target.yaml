@@ -1,0 +1,141 @@
+name: "SQL Injection Login Bypass"
+slug: "sqli-login-bypass"
+version: "1.0.0"
+difficulty: "easy"
+description: >-
+  A corporate employee portal with a login form vulnerable to classic
+  SQL injection. Bypass authentication, escalate through UNION-based
+  injection on internal search, and exploit misconfigurations to gain
+  full system access.
+briefing: |
+  MISSION BRIEFING - OPERATION BROKEN GATE
+  ==========================================
+
+  Agent, we have identified a web portal belonging to Nexus Corp, a
+  defense contractor suspected of mishandling classified data. Their
+  employee portal at port 8080 is our way in.
+
+  Intelligence suggests the developer cut corners on input validation.
+  The login form may be vulnerable to SQL injection. Once inside, look
+  for additional attack surfaces -- rumor has it their internal search
+  tool is even less secure than the front door.
+
+  Your objectives:
+    1. Enumerate the target and locate hidden resources
+    2. Bypass the login using SQL injection
+    3. Extract sensitive data from the database
+    4. Escalate privileges to root and retrieve the final flag
+
+  Good luck, agent. The clock is ticking.
+
+author: "howl-team"
+cves:
+  - "CWE-89"
+  - "CWE-287"
+  - "CWE-269"
+tags:
+  - "sql-injection"
+  - "authentication-bypass"
+  - "union-injection"
+  - "privilege-escalation"
+  - "web"
+  - "sqlite"
+
+services:
+  - name: "webapp"
+    port: 8080
+    protocol: "tcp"
+    description: "Nexus Corp Employee Portal (Flask/SQLite)"
+
+attack_chain:
+  - name: "Reconnaissance"
+    description: >-
+      Scan the target with nmap and use directory brute-forcing to
+      discover hidden paths and resources on the web server.
+    tools_suggested:
+      - "nmap"
+      - "gobuster"
+      - "dirb"
+      - "nikto"
+    flag:
+      type: "stage"
+      path: "/var/www/html/.hidden/recon_flag.txt"
+    points: 50
+    hints:
+      - level: 1
+        text: "Start with a full port scan and then enumerate web directories."
+      - level: 2
+        text: "Try common wordlists like dirb/common.txt against port 8080."
+      - level: 3
+        text: "There is a .hidden directory under the web root at /var/www/html/."
+
+  - name: "Initial Access"
+    description: >-
+      The login form is vulnerable to SQL injection. Craft an injection
+      payload that bypasses authentication and grants access as admin.
+    tools_suggested:
+      - "burpsuite"
+      - "sqlmap"
+      - "curl"
+    flag:
+      type: "user"
+      path: "/home/webapp/user.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "The login form passes credentials directly into a SQL query without sanitization."
+      - level: 2
+        text: "Try a classic authentication bypass payload in the username field."
+      - level: 3
+        text: "Use the payload: admin' OR '1'='1' -- in the username field with any password."
+
+  - name: "Data Extraction"
+    description: >-
+      After logging in, the employee search page is also vulnerable to
+      SQL injection. Use UNION-based injection to enumerate database
+      tables and extract secrets.
+    tools_suggested:
+      - "sqlmap"
+      - "burpsuite"
+      - "curl"
+    flag:
+      type: "stage"
+      path: "/opt/secrets/db_flag.txt"
+    points: 150
+    hints:
+      - level: 1
+        text: "The search field on the dashboard is vulnerable to UNION-based SQL injection."
+      - level: 2
+        text: "Determine the number of columns first, then use UNION SELECT to read other tables."
+      - level: 3
+        text: "Try: ' UNION SELECT sql,2,3 FROM sqlite_master -- to enumerate tables, then look for a secrets table."
+
+  - name: "Privilege Escalation"
+    description: >-
+      Escalate from the webapp user to root. Look for SUID binaries
+      or sudo misconfigurations that allow privilege escalation to
+      retrieve the final root flag.
+    tools_suggested:
+      - "linpeas"
+      - "find"
+      - "sudo"
+    flag:
+      type: "root"
+      path: "/root/root.txt"
+    points: 200
+    hints:
+      - level: 1
+        text: "Check for SUID binaries and sudo permissions for the webapp user."
+      - level: 2
+        text: "The webapp user can run a specific command as root via sudo without a password."
+      - level: 3
+        text: "Run 'sudo -l' to see that sqlite3 can be run as root. Use: sudo sqlite3 /dev/null '.shell cat /root/root.txt'"
+
+par_time_minutes: 45
+
+docker:
+  compose_file: "docker-compose.yml"
+  build_required: true
+  post_start:
+    - container: "webapp"
+      command: "python /app/init_db.py"

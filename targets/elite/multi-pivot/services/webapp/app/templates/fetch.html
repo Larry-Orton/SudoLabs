@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Status Checker - CorpNet Solutions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e17;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar .logo {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+
+        .navbar .logo span {
+            color: #f0883e;
+        }
+
+        .navbar nav a {
+            color: #8b949e;
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+
+        .navbar nav a:hover,
+        .navbar nav a.active {
+            color: #58a6ff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 48px auto;
+            padding: 0 32px;
+        }
+
+        h1 {
+            color: #e6edf3;
+            font-size: 1.8em;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .fetch-form {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .fetch-form label {
+            display: block;
+            color: #e6edf3;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .fetch-form input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 0.95em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .fetch-form input[type="text"]:focus {
+            border-color: #58a6ff;
+        }
+
+        .fetch-form button {
+            padding: 10px 24px;
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .fetch-form button:hover {
+            background-color: #2ea043;
+        }
+
+        .result-box {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .result-box h3 {
+            color: #e6edf3;
+            margin-bottom: 12px;
+        }
+
+        .result-box .output {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85em;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        .error {
+            color: #f85149;
+            background-color: #1a0f0f;
+            border: 1px solid #f8514933;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 0.9em;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: #484f58;
+            font-size: 0.85em;
+            border-top: 1px solid #21262d;
+            margin-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Corp<span>Net</span> Solutions</div>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/news">News</a>
+            <a href="/fetch" class="active">Website Status</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h1>Website Status Checker</h1>
+        <p class="subtitle">Enter a URL to check its availability. Our server will fetch the URL and display the response content.</p>
+
+        <div class="fetch-form">
+            <form method="POST" action="/fetch">
+                <label for="url">Target URL</label>
+                <div class="form-row">
+                    <input type="text" id="url" name="url" placeholder="https://example.com" value="{{ url }}">
+                    <button type="submit">Check Status</button>
+                </div>
+            </form>
+        </div>
+
+        {% if error %}
+        <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if result is not none %}
+        <div class="result-box">
+            <h3>Response from {{ url }}</h3>
+            <div class="output">{{ result }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        CorpNet Solutions v3.2.1 &mdash; Public Portal &mdash; &copy; 2024 CorpNet Solutions Inc.
+    </div>
+</body>
+</html>

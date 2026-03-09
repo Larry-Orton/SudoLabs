@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Corp - Employee Search</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e17;
+            color: #c8ccd4;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #1e3a6e, #2b5797);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #5ba0f5;
+        }
+
+        .nav-brand span {
+            font-weight: 600;
+            color: #e4e7ed;
+            font-size: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: #e4e7ed;
+        }
+
+        .nav-links a.active {
+            color: #3b82f6;
+        }
+
+        .main-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            font-size: 22px;
+            color: #e4e7ed;
+            margin-bottom: 6px;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .search-box {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .search-form input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            background: #0d1117;
+            border: 1px solid #2d3748;
+            border-radius: 8px;
+            color: #e4e7ed;
+            font-size: 14px;
+        }
+
+        .search-form input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .search-form input[type="text"]::placeholder {
+            color: #4b5563;
+        }
+
+        .search-btn {
+            padding: 10px 24px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .search-btn:hover {
+            opacity: 0.9;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #f87171;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .results-table {
+            width: 100%;
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .results-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table th {
+            background: #1a2332;
+            color: #9ca3af;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        .results-table td {
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #c8ccd4;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .results-table tr:hover td {
+            background: rgba(59, 130, 246, 0.04);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .result-count {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .help-text {
+            background: rgba(59, 130, 246, 0.06);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .help-text strong {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <div class="nav-brand-icon">N</div>
+            <span>NEXUS CORP</span>
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/search" class="active">Employee Search</a>
+            <a href="/logout">Sign Out</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Employee Directory Search</h1>
+            <p>Search employees by name or department.</p>
+        </div>
+
+        <div class="search-box">
+            <form method="POST" action="/search" class="search-form">
+                <input type="text" name="query" placeholder="Search by name or department..."
+                       value="{{ query }}" autocomplete="off">
+                <button type="submit" class="search-btn">Search</button>
+            </form>
+        </div>
+
+        {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if results %}
+        <div class="result-count">Found {{ results|length }} result(s)</div>
+        <div class="results-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in results %}
+                    <tr>
+                        <td>{{ row[0] }}</td>
+                        <td>{{ row[1] }}</td>
+                        <td>{{ row[2] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif query %}
+        <div class="results-table">
+            <div class="no-results">No employees found matching "{{ query }}"</div>
+        </div>
+        {% endif %}
+
+        <div class="help-text">
+            <strong>Search tips:</strong> Enter a name (e.g., "Alice") or department
+            (e.g., "Engineering") to find matching employees. Partial matches are supported.
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaultAPI - Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0e17;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a0000 0%, #0d1117 100%);
+            border-bottom: 1px solid #da3633;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #f85149;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .header .subtitle {
+            color: #da3633;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #161b22 0%, #1c1226 100%);
+            border: 1px solid #30363d;
+            border-left: 4px solid #f85149;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .welcome-banner h2 {
+            color: #e6edf3;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-banner p {
+            color: #8b949e;
+            line-height: 1.6;
+        }
+
+        .flag-display {
+            background: #0d1117;
+            border: 1px solid #1f6feb;
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .flag-display .label {
+            color: #58a6ff;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .flag-display .value {
+            color: #3fb950;
+            word-break: break-all;
+        }
+
+        .section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #1c2128;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #30363d;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e6edf3;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-header .icon {
+            color: #f85149;
+        }
+
+        .section-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #e6edf3;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group .hint {
+            color: #8b949e;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            font-style: italic;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            color: #c9d1d9;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #238636;
+            color: #ffffff;
+            border-color: #2ea043;
+        }
+
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+
+        .result-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            margin-top: 1rem;
+        }
+
+        .result-box .label {
+            color: #d29922;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-box .output {
+            color: #c9d1d9;
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: #0d1117;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .stat-card .label {
+            color: #8b949e;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .api-note {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .api-note p {
+            color: #8b949e;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .api-note code {
+            background: #161b22;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            color: #79c0ff;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            color: #484f58;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>VaultAPI Admin</h1>
+        <div class="subtitle">Administration Dashboard</div>
+    </div>
+
+    <div class="container">
+        <!-- Welcome Banner -->
+        <div class="welcome-banner">
+            <h2>Welcome, {{ username }}</h2>
+            <p>You are logged in with <strong>admin</strong> privileges. You have full access to the vault management system and configuration tools.</p>
+            <div class="flag-display">
+                <div class="label">Admin Access Verified - User Flag:</div>
+                <div class="value">{{ user_flag }}</div>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div class="section">
+            <div class="section-header">
+                <span class="icon">&#9632;</span> Dashboard Overview
+            </div>
+            <div class="section-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="number">6</div>
+                        <div class="label">Documents</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">3</div>
+                        <div class="label">Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">2</div>
+                        <div class="label">Classified</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Greeting Template Editor (SSTI Vulnerability) -->
+        <div class="section">
+            <div class="section-header">
+                <span class="icon">&#9998;</span> Custom Greeting Template
+            </div>
+            <div class="section-body">
+                <form method="POST" action="/admin/greeting">
+                    <div class="form-group">
+                        <label for="template">Greeting Template</label>
+                        <div class="hint">
+                            Use Jinja2 template syntax. Available variable: <code style="background: #0d1117; padding: 0.1rem 0.3rem; border-radius: 3px; color: #79c0ff;">&#123;&#123; username &#125;&#125;</code>
+                        </div>
+                        <textarea
+                            id="template"
+                            name="template"
+                            placeholder="Hello {{ username }}, welcome back to VaultAPI!"
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Render Template</button>
+                </form>
+
+                {% if greeting_result is not none %}
+                <div class="result-box">
+                    <div class="label">Rendered Output</div>
+                    <div class="output">{{ greeting_result | safe }}</div>
+                </div>
+                {% endif %}
+
+                <div class="api-note">
+                    <p>
+                        <strong>API Usage:</strong> You can also set the greeting via the API:
+                    </p>
+                    <p style="margin-top: 0.5rem;">
+                        <code>curl -X POST http://localhost:8080/admin/greeting -H "Authorization: Bearer &lt;token&gt;" -d "template=Hello &#123;&#123; username &#125;&#125;!"</code>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="section">
+            <div class="section-header">
+                <span class="icon">&#9881;</span> System Information
+            </div>
+            <div class="section-body">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="border-bottom: 1px solid #21262d;">
+                        <td style="padding: 0.6rem 0; color: #8b949e; width: 200px;">Application</td>
+                        <td style="padding: 0.6rem 0; color: #e6edf3;">VaultAPI v1.4.2</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #21262d;">
+                        <td style="padding: 0.6rem 0; color: #8b949e;">Framework</td>
+                        <td style="padding: 0.6rem 0; color: #e6edf3;">Flask 3.0.0 / Jinja2</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #21262d;">
+                        <td style="padding: 0.6rem 0; color: #8b949e;">Authentication</td>
+                        <td style="padding: 0.6rem 0; color: #e6edf3;">JWT (HS256) via PyJWT 2.8.0</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #21262d;">
+                        <td style="padding: 0.6rem 0; color: #8b949e;">Template Engine</td>
+                        <td style="padding: 0.6rem 0; color: #e6edf3;">Jinja2 (render_template_string)</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.6rem 0; color: #8b949e;">Server Status</td>
+                        <td style="padding: 0.6rem 0; color: #3fb950;">Online</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        VaultAPI Admin Panel &mdash; Restricted Access &mdash; All actions are logged
+    </div>
+</body>
+</html>

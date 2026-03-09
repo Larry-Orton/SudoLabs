@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkLens - URL Preview Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e17;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar .logo {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+
+        .navbar .logo span {
+            color: #f0883e;
+        }
+
+        .navbar nav a {
+            color: #8b949e;
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+
+        .navbar nav a:hover,
+        .navbar nav a.active {
+            color: #58a6ff;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 60px 32px 30px;
+        }
+
+        .hero h1 {
+            font-size: 2.5em;
+            color: #e6edf3;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            font-size: 1.1em;
+            color: #8b949e;
+            max-width: 620px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .preview-form {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 0 32px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-group input[type="text"] {
+            flex: 1;
+            padding: 14px 18px;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #e6edf3;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input[type="text"]:focus {
+            border-color: #58a6ff;
+        }
+
+        .input-group input[type="text"]::placeholder {
+            color: #484f58;
+        }
+
+        .input-group button {
+            padding: 14px 28px;
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .input-group button:hover {
+            background-color: #2ea043;
+        }
+
+        .error-box {
+            max-width: 700px;
+            margin: 20px auto;
+            padding: 14px 20px;
+            background-color: #3d1a1a;
+            border: 1px solid #6e3030;
+            border-radius: 8px;
+            color: #f08080;
+            font-size: 0.95em;
+        }
+
+        .result-container {
+            max-width: 700px;
+            margin: 24px auto;
+            padding: 0 32px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .result-header .url {
+            color: #58a6ff;
+            font-size: 0.9em;
+            word-break: break-all;
+        }
+
+        .result-header .meta {
+            color: #8b949e;
+            font-size: 0.85em;
+            white-space: nowrap;
+            margin-left: 16px;
+        }
+
+        .result-header .meta .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.8em;
+        }
+
+        .result-header .meta .status.ok {
+            background-color: #1a3d1a;
+            color: #56d364;
+        }
+
+        .result-header .meta .status.error {
+            background-color: #3d1a1a;
+            color: #f08080;
+        }
+
+        .result-body {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 20px;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .result-body pre {
+            color: #c9d1d9;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 700px;
+            margin: 48px auto;
+            padding: 0 32px;
+        }
+
+        .feature-card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .feature-card .icon {
+            font-size: 2em;
+            margin-bottom: 12px;
+        }
+
+        .feature-card h3 {
+            color: #e6edf3;
+            font-size: 1em;
+            margin-bottom: 6px;
+        }
+
+        .feature-card p {
+            color: #8b949e;
+            font-size: 0.85em;
+            line-height: 1.4;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: #484f58;
+            font-size: 0.85em;
+            border-top: 1px solid #21262d;
+            margin-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Link<span>Lens</span></div>
+        <nav>
+            <a href="/" class="active">Preview</a>
+            <a href="/admin">Admin</a>
+        </nav>
+    </div>
+
+    <div class="hero">
+        <h1>URL Preview Tool</h1>
+        <p>Paste any URL to fetch and preview its content. Verify links before sharing them across your organization.</p>
+    </div>
+
+    <div class="preview-form">
+        <form action="/preview" method="POST">
+            <div class="input-group">
+                <input type="text" name="url" placeholder="https://example.com" value="{{ preview_url or '' }}" autocomplete="off" />
+                <button type="submit">Preview</button>
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div class="error-box">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    {% if preview_content is defined and preview_content is not none %}
+    <div class="result-container">
+        <div class="result-header">
+            <span class="url">{{ preview_url }}</span>
+            <span class="meta">
+                {% if preview_status and preview_status < 400 %}
+                <span class="status ok">{{ preview_status }}</span>
+                {% elif preview_status %}
+                <span class="status error">{{ preview_status }}</span>
+                {% endif %}
+                {{ preview_type }}
+            </span>
+        </div>
+        <div class="result-body">
+            <pre>{{ preview_content }}</pre>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not preview_content and not error %}
+    <div class="features">
+        <div class="feature-card">
+            <div class="icon">&#128279;</div>
+            <h3>Fetch Any URL</h3>
+            <p>Preview content from any web address before sharing it.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">&#128274;</div>
+            <h3>Safe Preview</h3>
+            <p>Content is fetched server-side so your browser stays safe.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">&#9889;</div>
+            <h3>Instant Results</h3>
+            <p>Get immediate page content and metadata in seconds.</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        LinkLens v2.3.1 &mdash; Internal Use Only &mdash; IT Department
+    </div>
+</body>
+</html>

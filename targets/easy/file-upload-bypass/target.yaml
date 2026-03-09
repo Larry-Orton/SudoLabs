@@ -1,0 +1,137 @@
+name: "Unrestricted File Upload"
+slug: "file-upload-bypass"
+version: "1.0.0"
+difficulty: "easy"
+description: >-
+  A photo sharing application with no file type validation on uploads,
+  allowing attackers to upload arbitrary scripts and achieve remote code
+  execution through a hidden admin endpoint that executes uploaded files.
+briefing: |
+  MISSION BRIEFING - OPERATION SHUTTER CLICK
+  ============================================
+
+  Agent, we've been monitoring a small startup called "PixShare" that
+  recently launched a photo sharing platform. The site is basic -- a
+  simple upload form where users can share images with friends.
+
+  Our intelligence suggests the developer rushed to ship and never
+  implemented any file type validation on uploads. Worse, source code
+  fragments found in a paste site hint at a hidden administration
+  endpoint used during development that was never removed. This endpoint
+  appears capable of executing server-side scripts.
+
+  Your objectives:
+    1. Enumerate the target and discover the upload functionality
+       along with any hidden directories or endpoints.
+    2. Exploit the unrestricted upload to place a malicious script
+       on the server and achieve command execution.
+    3. Escalate privileges using a misconfigured SUID binary.
+    4. Obtain root-level access and retrieve the final flag.
+
+  The developer's carelessness is our advantage. Good hunting.
+
+author: "howl-team"
+cves:
+  - "CWE-434"
+tags:
+  - "file-upload"
+  - "webshell"
+  - "web"
+  - "privilege-escalation"
+  - "suid"
+
+services:
+  - name: "PixShare Web App"
+    port: 8080
+    protocol: "tcp"
+    description: "Flask-based photo sharing application with unrestricted file uploads"
+
+attack_chain:
+  - name: "Reconnaissance"
+    description: >-
+      Scan the target to discover the web application, explore the upload
+      functionality, and enumerate hidden directories and endpoints.
+    tools_suggested:
+      - "nmap"
+      - "gobuster"
+      - "dirb"
+      - "curl"
+    flag:
+      type: "stage"
+      path: "/var/www/.config/recon_flag.txt"
+    points: 50
+    hints:
+      - level: 1
+        text: "Start with a port scan and then enumerate web directories with a common wordlist."
+      - level: 2
+        text: "There is an /uploads/ directory that lists previously uploaded files."
+      - level: 3
+        text: "Directory enumeration reveals a hidden /admin/ endpoint. Also check /var/www/.config/."
+
+  - name: "Initial Access"
+    description: >-
+      Upload a malicious Python script through the unrestricted upload form,
+      then use the hidden admin endpoint to execute it and gain command
+      execution on the server.
+    tools_suggested:
+      - "curl"
+      - "browser"
+      - "burpsuite"
+      - "python"
+    flag:
+      type: "user"
+      path: "/home/webapp/user.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "The upload form accepts any file type -- there is no validation on extensions or MIME types."
+      - level: 2
+        text: "Upload a .py file and note the path it is saved to. The /admin/execute endpoint can run files on the server."
+      - level: 3
+        text: "Upload a Python script containing: import os; print(os.popen('cat /home/webapp/user.txt').read()) -- then visit /admin/execute?file=/app/uploads/yourscript.py"
+
+  - name: "Privilege Escalation"
+    description: >-
+      Discover a misconfigured SUID binary that can be leveraged to read
+      files owned by root and escalate privileges.
+    tools_suggested:
+      - "find"
+      - "linpeas"
+      - "gtfobins"
+    flag:
+      type: "stage"
+      path: "/opt/privesc_flag.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "Use your command execution to search for SUID binaries on the system."
+      - level: 2
+        text: "Run: find / -perm -4000 -type f 2>/dev/null -- the cp command has the SUID bit set."
+      - level: 3
+        text: "Use SUID cp to copy the flag to a readable location: cp /opt/privesc_flag.txt /tmp/flag.txt && cat /tmp/flag.txt"
+
+  - name: "Root Flag"
+    description: >-
+      Use the SUID cp binary to read or copy the root flag, or overwrite
+      /etc/passwd to gain a root shell.
+    tools_suggested:
+      - "cp"
+      - "gtfobins"
+      - "openssl"
+    flag:
+      type: "root"
+      path: "/root/root.txt"
+    points: 150
+    hints:
+      - level: 1
+        text: "The SUID cp binary runs with root privileges. Check GTFOBins for cp exploitation techniques."
+      - level: 2
+        text: "You can use SUID cp to copy /root/root.txt to a world-readable location."
+      - level: 3
+        text: "Run: cp /root/root.txt /tmp/root_flag.txt && chmod 644 /tmp/root_flag.txt && cat /tmp/root_flag.txt"
+
+par_time_minutes: 35
+
+docker:
+  compose_file: "docker-compose.yml"
+  build_required: true

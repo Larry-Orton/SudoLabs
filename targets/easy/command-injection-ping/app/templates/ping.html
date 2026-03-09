@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Utility - NetTools Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0a0e17;
+            color: #c9d1d9;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar .logo {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #58a6ff;
+        }
+
+        .navbar .logo span {
+            color: #f0883e;
+        }
+
+        .navbar nav a {
+            color: #8b949e;
+            text-decoration: none;
+            margin-left: 24px;
+            font-size: 0.95em;
+            transition: color 0.2s;
+        }
+
+        .navbar nav a:hover,
+        .navbar nav a.active {
+            color: #58a6ff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 48px auto;
+            padding: 0 32px;
+        }
+
+        h1 {
+            font-size: 1.8em;
+            color: #e6edf3;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 32px;
+            font-size: 0.95em;
+        }
+
+        .ping-form {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .ping-form label {
+            display: block;
+            color: #e6edf3;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .ping-form .helper {
+            color: #8b949e;
+            font-size: 0.85em;
+            margin-bottom: 16px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-group input[type="text"] {
+            flex: 1;
+            padding: 10px 14px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #e6edf3;
+            font-size: 1em;
+            font-family: 'Consolas', 'Courier New', monospace;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input[type="text"]:focus {
+            border-color: #58a6ff;
+        }
+
+        .input-group input[type="text"]::placeholder {
+            color: #484f58;
+        }
+
+        .input-group button {
+            padding: 10px 24px;
+            background-color: #238636;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+
+        .input-group button:hover {
+            background-color: #2ea043;
+        }
+
+        .output-section {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .output-header {
+            background-color: #21262d;
+            padding: 12px 20px;
+            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .output-header .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #238636;
+        }
+
+        .output-header span {
+            color: #8b949e;
+            font-size: 0.85em;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .output-body {
+            padding: 20px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #7ee787;
+            background-color: #0d1117;
+            min-height: 120px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .output-body.empty {
+            color: #484f58;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 32px;
+            color: #484f58;
+            font-size: 0.85em;
+            border-top: 1px solid #21262d;
+            margin-top: 64px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">Net<span>Tools</span> Pro</div>
+        <nav>
+            <a href="/">Dashboard</a>
+            <a href="/ping" class="active">Ping</a>
+        </nav>
+    </div>
+
+    <div class="container">
+        <h1>Ping Utility</h1>
+        <p class="subtitle">Send ICMP echo requests to test host connectivity and measure response times.</p>
+
+        <div class="ping-form">
+            <form method="POST" action="/ping">
+                <label for="ip">Target Host</label>
+                <p class="helper">Enter an IP address or hostname to ping (e.g., 192.168.1.1 or example.com)</p>
+                <div class="input-group">
+                    <input type="text" id="ip" name="ip" placeholder="Enter IP address or hostname" value="{{ ip_address }}" autocomplete="off">
+                    <button type="submit">Run Ping</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="output-section">
+            <div class="output-header">
+                <div class="dot"></div>
+                <span>terminal output</span>
+            </div>
+            <div class="output-body {% if not output %}empty{% endif %}">{% if output %}{{ output }}{% else %}Waiting for command... Enter an IP address above and click "Run Ping" to begin.{% endif %}</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        NetTools Pro v2.1.0 &mdash; Internal Use Only &mdash; IT Department
+    </div>
+</body>
+</html>

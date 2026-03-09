@@ -1,0 +1,9 @@
+services:
+  command-injection-ping:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: howl-command-injection-ping
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

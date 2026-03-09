@@ -1,0 +1,167 @@
+name: "Multi-Service Pivot"
+slug: "multi-pivot"
+difficulty: "elite"
+description: >
+  A multi-container corporate network with a DMZ web app, internal API, and
+  admin panel. Requires pivoting between services to reach the crown jewels.
+briefing: |
+  MISSION BRIEFING - OPERATION CHAIN LINK
+  ========================================
+
+  Intelligence has uncovered a segmented corporate network operated by
+  "CorpNet Solutions", a mid-sized IT services company. Their infrastructure
+  is split across multiple isolated network segments:
+
+    - DMZ (172.20.0.0/24): A public-facing web application accessible from
+      the internet. This is your ONLY entry point.
+    - Internal Network (172.21.0.0/24): Backend services including an API
+      server and an administration panel. These are NOT directly reachable
+      from the outside.
+
+  Preliminary reconnaissance indicates the public web app has a "Website
+  Status Checker" feature that fetches URLs on the server side. This is a
+  classic SSRF vector that could allow you to reach internal services.
+
+  PHASE 1 - RECONNAISSANCE & INITIAL ACCESS
+    Discover the web application, identify the URL fetcher, and use it to
+    probe the internal network (172.21.0.0/24). The internal API server
+    runs on 172.21.0.2:5000.
+
+  PHASE 2 - PIVOT TO INTERNAL API
+    Use the SSRF to query the internal API. It exposes sensitive endpoints
+    including one that leaks administrative credentials in plaintext.
+
+  PHASE 3 - ADMIN PANEL ACCESS
+    Leverage the leaked credentials to authenticate to the admin panel at
+    172.21.0.3:8443 (via the SSRF). The admin panel has a diagnostics
+    feature with a command injection vulnerability.
+
+  PHASE 4 - ROOT FLAG
+    Chain the command injection through the admin panel to escalate
+    privileges on the webapp container. A misconfigured SUID binary is
+    your path to root.
+
+  This is an elite-level engagement. You will need to chain multiple
+  vulnerabilities across network boundaries. Stay sharp, operator.
+author: "howl-team"
+cves:
+  - "CWE-78"
+  - "CWE-918"
+  - "CWE-522"
+tags:
+  - "pivoting"
+  - "multi-container"
+  - "ssrf"
+  - "command-injection"
+  - "credential-reuse"
+  - "network"
+services:
+  - name: "webapp"
+    port: 8080
+    protocol: "http"
+    description: "Public-facing web application (DMZ)"
+
+attack_chain:
+  - name: "Reconnaissance & Initial Access"
+    description: >
+      Discover the public web application and enumerate its functionality.
+      The /fetch endpoint accepts arbitrary URLs and fetches them server-side
+      (SSRF - CWE-918). Use this to scan the internal network at
+      172.21.0.0/24. The webapp container sits on both the DMZ and internal
+      networks, making it the pivot point. Retrieve the recon flag to prove
+      you have identified the attack surface.
+    tools_suggested:
+      - "nmap"
+      - "curl"
+      - "browser"
+      - "burpsuite"
+    flag:
+      type: "stage"
+      path: "/var/www/.config/recon_flag.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "Explore the web application thoroughly. There is a form that lets you check website availability by fetching URLs."
+      - level: 2
+        text: "The /fetch endpoint takes a 'url' parameter and will fetch any URL from the server side, including internal IPs."
+      - level: 3
+        text: "Try fetching http://172.21.0.2:5000 through the /fetch endpoint. The internal API will respond."
+
+  - name: "Pivot to Internal API"
+    description: >
+      Use the SSRF vulnerability in the /fetch endpoint to access the
+      internal API at 172.21.0.2:5000. Enumerate the API endpoints to
+      discover /api/credentials, which leaks administrative credentials
+      including the admin panel password and SSH deploy key in plaintext
+      (CWE-522). Retrieve the user flag.
+    tools_suggested:
+      - "curl"
+      - "burpsuite"
+      - "browser"
+    flag:
+      type: "user"
+      path: "/home/webapp/user.txt"
+    points: 125
+    hints:
+      - level: 1
+        text: "The internal API has several endpoints. Try /api/health, /api/config, /api/users, and /api/credentials."
+      - level: 2
+        text: "Fetch http://172.21.0.2:5000/api/credentials through the SSRF. It returns plaintext passwords."
+      - level: 3
+        text: "The credentials endpoint returns admin_user: corpadmin, admin_pass: C0rpN3t!2024. Use these for the next stage."
+
+  - name: "Admin Panel Access"
+    description: >
+      Use the leaked credentials to authenticate to the admin panel at
+      172.21.0.3:8443 via the SSRF. The admin panel has a diagnostics
+      feature at /admin/diag that accepts a 'cmd' parameter and passes it
+      directly to os.popen() (CWE-78). Use command injection through the
+      admin panel to write the pivot flag to the webapp container.
+    tools_suggested:
+      - "curl"
+      - "burpsuite"
+      - "browser"
+    flag:
+      type: "stage"
+      path: "/opt/secrets/pivot_flag.txt"
+    points: 125
+    hints:
+      - level: 1
+        text: "The admin panel at 172.21.0.3:8443 uses HTTP Basic Auth. Use the credentials from the API."
+      - level: 2
+        text: "Access http://corpadmin:C0rpN3t!2024@172.21.0.3:8443/admin/diag via SSRF. The diagnostics page accepts a cmd parameter."
+      - level: 3
+        text: "Inject a command via /admin/diag?cmd=id to confirm RCE on the admin panel. Use curl from the admin panel to write a flag back to the webapp at 172.21.0.4."
+
+  - name: "Root Flag"
+    description: >
+      Chain the command injection through the admin panel to gain elevated
+      access on the webapp container. The /usr/bin/find binary has the SUID
+      bit set, which can be abused via the -exec flag to run commands as
+      root. Use this to read the root flag at /root/root.txt.
+    tools_suggested:
+      - "find"
+      - "gtfobins"
+      - "curl"
+    flag:
+      type: "root"
+      path: "/root/root.txt"
+    points: 150
+    hints:
+      - level: 1
+        text: "You need to get command execution on the webapp container itself. Use the admin panel injection to reach back to webapp."
+      - level: 2
+        text: "On the webapp container, search for SUID binaries: find / -perm -4000 -type f 2>/dev/null"
+      - level: 3
+        text: "The find binary has SUID set. Use: find . -exec /bin/sh -p -c 'cat /root/root.txt' \\; to read the root flag."
+
+par_time_minutes: 90
+
+docker:
+  compose_file: "docker-compose.yml"
+  build_required: true
+  networks:
+    - name: "dmz"
+      subnet: "172.20.0.0/24"
+    - name: "internal"
+      subnet: "172.21.0.0/24"

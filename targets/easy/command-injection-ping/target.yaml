@@ -1,0 +1,112 @@
+name: "Command Injection - Ping Utility"
+slug: "command-injection-ping"
+difficulty: "easy"
+description: "A vulnerable network diagnostic tool that passes user input directly to a system command, enabling OS command injection."
+briefing: |
+  MISSION BRIEFING
+  ================
+
+  Agent, we've identified a web-based network diagnostic tool deployed by
+  a small IT services company called "NetTools Pro". The application allows
+  users to ping hosts directly from the browser.
+
+  Our preliminary analysis suggests the developer built the ping feature
+  by passing user input straight into a system shell command with no
+  sanitization whatsoever. This is a textbook CWE-78: OS Command Injection
+  vulnerability.
+
+  Your objectives:
+    1. Locate the web application and identify the vulnerable endpoint.
+    2. Exploit the command injection flaw to gain initial access.
+    3. Escalate privileges using a misconfigured SUID binary.
+    4. Obtain root-level access and retrieve the final flag.
+
+  This should be a quick op. Good hunting.
+author: "howl-team"
+cves:
+  - "CWE-78"
+tags:
+  - "command-injection"
+  - "web"
+  - "linux"
+  - "suid"
+  - "privilege-escalation"
+services:
+  - name: "NetTools Pro Web App"
+    port: 8080
+    protocol: "tcp"
+    description: "Flask-based network diagnostic tool with ping functionality"
+attack_chain:
+  - name: "Reconnaissance"
+    description: "Scan the target to discover the web application and identify the ping utility endpoint."
+    tools_suggested:
+      - "nmap"
+      - "curl"
+      - "browser"
+    flag:
+      type: "stage"
+      path: "/var/www/.config/recon_flag.txt"
+    points: 50
+    hints:
+      - level: 1
+        text: "Start with a port scan to find which services are running."
+      - level: 2
+        text: "There is a web application running on a common alternative HTTP port."
+      - level: 3
+        text: "Visit the web app in your browser and explore all available pages and forms."
+
+  - name: "Initial Access"
+    description: "Exploit the OS command injection vulnerability in the ping form to execute arbitrary commands on the server."
+    tools_suggested:
+      - "browser"
+      - "curl"
+      - "burpsuite"
+    flag:
+      type: "user"
+      path: "/home/webapp/user.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "The ping form sends user input to a system command. What happens if you include shell metacharacters?"
+      - level: 2
+        text: "Try appending a semicolon followed by another command, e.g., 127.0.0.1; whoami"
+      - level: 3
+        text: "Use the injection to read files: 127.0.0.1; cat /home/webapp/user.txt"
+
+  - name: "Privilege Escalation"
+    description: "Discover a misconfigured SUID binary that can be leveraged to escalate privileges."
+    tools_suggested:
+      - "find"
+      - "linpeas"
+    flag:
+      type: "stage"
+      path: "/opt/privesc_flag.txt"
+    points: 100
+    hints:
+      - level: 1
+        text: "Look for binaries with the SUID bit set."
+      - level: 2
+        text: "Run: find / -perm -4000 -type f 2>/dev/null"
+      - level: 3
+        text: "The 'find' command itself has the SUID bit set. Check GTFOBins for exploitation techniques."
+
+  - name: "Post-Exploitation"
+    description: "Use the SUID find binary to obtain a root shell and capture the final flag."
+    tools_suggested:
+      - "find"
+      - "gtfobins"
+    flag:
+      type: "root"
+      path: "/root/root.txt"
+    points: 150
+    hints:
+      - level: 1
+        text: "GTFOBins lists techniques for abusing SUID binaries to escalate privileges."
+      - level: 2
+        text: "The find command can execute other commands with -exec."
+      - level: 3
+        text: "Try: find . -exec /bin/sh -p \\; — the -p flag preserves the effective UID."
+par_time_minutes: 30
+docker:
+  compose_file: "docker-compose.yml"
+  build_required: true

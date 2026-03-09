@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  webapp:
+    build:
+      context: ./services/webapp
+      dockerfile: Dockerfile
+    container_name: howl-multi-pivot-webapp
+    ports:
+      - "8080:8080"
+    networks:
+      dmz:
+        ipv4_address: 172.20.0.2
+      internal:
+        ipv4_address: 172.21.0.4
+    restart: unless-stopped
+
+  internal-api:
+    build:
+      context: ./services/internal-api
+      dockerfile: Dockerfile
+    container_name: howl-multi-pivot-api
+    networks:
+      internal:
+        ipv4_address: 172.21.0.2
+    restart: unless-stopped
+
+  admin-panel:
+    build:
+      context: ./services/admin-panel
+      dockerfile: Dockerfile
+    container_name: howl-multi-pivot-admin
+    networks:
+      internal:
+        ipv4_address: 172.21.0.3
+    restart: unless-stopped
+
+networks:
+  dmz:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+  internal:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24

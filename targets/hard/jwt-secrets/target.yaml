@@ -1,0 +1,158 @@
+name: "JWT Weak Secret & SSTI"
+slug: "jwt-secrets"
+difficulty: "hard"
+description: >
+  A REST API using JWTs signed with a guessable secret key. Forge admin tokens
+  to bypass authentication, then exploit Server-Side Template Injection (SSTI) in
+  the admin panel's Jinja2 template engine to achieve remote code execution.
+briefing: |
+  MISSION BRIEFING - OPERATION BROKEN SEAL
+  ==========================================
+
+  Intelligence has uncovered "VaultAPI" - a secure document vault API deployed by
+  a target organization. The development team claims the system is hardened, but
+  our sources indicate they cut corners on cryptographic key management.
+
+  Preliminary analysis suggests the API uses JSON Web Tokens (JWT) for
+  authentication with the HS256 algorithm. The development team reportedly used
+  a well-known default secret during prototyping and never rotated it to a
+  strong key before deploying to production.
+
+  PHASE 1 - RECONNAISSANCE
+    Map the API surface. The application exposes a documentation endpoint that
+    reveals the available routes. Register an account and capture a valid JWT
+    to study its structure.
+
+  PHASE 2 - JWT FORGERY
+    Decode the captured JWT and analyze its claims. The signing secret is a
+    common dictionary word. Crack it using tools like jwt_tool, hashcat, or
+    manual brute-force against a wordlist. Once you have the secret, forge a
+    token with elevated privileges.
+
+  PHASE 3 - SSTI EXPLOITATION
+    The admin panel includes a "custom greeting" feature that renders user
+    input through Jinja2's render_template_string(). Inject template syntax
+    to read server configuration, enumerate Python classes, and achieve
+    arbitrary code execution on the server.
+
+  PHASE 4 - PRIVILEGE ESCALATION
+    Enumerate the filesystem for SUID binaries. A misconfigured Python
+    interpreter can be leveraged to escalate to root and capture the
+    final flag.
+
+  Good luck, operator.
+author: "howl-team"
+cves:
+  - "CWE-345"
+  - "CWE-1336"
+tags:
+  - "jwt"
+  - "authentication"
+  - "ssti"
+  - "template-injection"
+  - "web"
+  - "privilege-escalation"
+services:
+  - name: "webapp"
+    port: 8080
+    protocol: "http"
+    description: "VaultAPI - Secure document vault REST API"
+
+attack_chain:
+  - name: "Reconnaissance"
+    description: >
+      Discover the API endpoints by probing the application and locating the
+      documentation route. Register a user account to obtain a valid JWT.
+      Decode the token to understand its structure (header, payload, signature)
+      and identify the signing algorithm.
+    tools_suggested:
+      - "curl"
+      - "nmap"
+      - "nikto"
+      - "jwt_tool"
+      - "base64"
+    flag:
+      type: "stage"
+      path: "/var/www/.config/recon_flag.txt"
+    points: 75
+    hints:
+      - level: 1
+        text: "Start by enumerating paths under /api/. The application has a documentation endpoint that lists all available routes."
+      - level: 2
+        text: "Register a user via POST /api/register with a JSON body containing 'username' and 'password'. Examine the JWT you receive."
+      - level: 3
+        text: "Decode the JWT by splitting on dots and base64-decoding the header and payload. Note the algorithm (alg) and the role claim."
+
+  - name: "JWT Forgery"
+    description: >
+      Crack the weak JWT signing secret using brute-force or dictionary attack.
+      The secret is a common password found in standard wordlists. Once
+      recovered, forge a new JWT with the 'role' claim set to 'admin' to gain
+      access to the administrative panel.
+    tools_suggested:
+      - "jwt_tool"
+      - "hashcat"
+      - "python3"
+      - "john"
+      - "curl"
+    flag:
+      type: "user"
+      path: "/home/webapp/user.txt"
+    points: 125
+    hints:
+      - level: 1
+        text: "The JWT uses the HS256 algorithm. The secret is a weak, commonly used password. Try cracking it with jwt_tool -C -d wordlist.txt or manual guessing."
+      - level: 2
+        text: "The secret is one of the most common default passwords. Think 'password', 'secret', 'password123', etc."
+      - level: 3
+        text: "The secret is 'password123'. Forge a token: import jwt; token = jwt.encode({'user': 'admin', 'role': 'admin'}, 'password123', algorithm='HS256'). Use it to access GET /admin."
+
+  - name: "SSTI Exploitation"
+    description: >
+      The admin panel's custom greeting feature passes user input directly to
+      Jinja2's render_template_string() without sanitization. Inject template
+      expressions to read server configuration, enumerate Python's Method
+      Resolution Order (MRO), and achieve remote code execution to read
+      sensitive files.
+    tools_suggested:
+      - "curl"
+      - "python3"
+      - "burpsuite"
+    flag:
+      type: "stage"
+      path: "/opt/secrets/ssti_flag.txt"
+    points: 125
+    hints:
+      - level: 1
+        text: "The admin 'Custom Greeting' field is rendered server-side with Jinja2. Try injecting {{7*7}} to confirm SSTI."
+      - level: 2
+        text: "Use {{config}} to dump Flask configuration, or {{''.__class__.__mro__}} to begin walking Python's class hierarchy for RCE."
+      - level: 3
+        text: "For file read, use a payload like: {{''.__class__.__mro__[1].__subclasses__()[X]('cat /opt/secrets/ssti_flag.txt',shell=True,stdout=-1).communicate()}} where X is the index of subprocess.Popen. Or use: {{cycler.__init__.__globals__.os.popen('cat /opt/secrets/ssti_flag.txt').read()}}"
+
+  - name: "Root Flag"
+    description: >
+      Use SSTI-based RCE to enumerate the filesystem for SUID binaries. The
+      python3 interpreter has the SUID bit set, allowing privilege escalation
+      to root. Use it to read the final root flag.
+    tools_suggested:
+      - "curl"
+      - "python3"
+      - "find"
+    flag:
+      type: "root"
+      path: "/root/root.txt"
+    points: 150
+    hints:
+      - level: 1
+        text: "Use your SSTI RCE to search for SUID binaries: find / -perm -4000 -type f 2>/dev/null"
+      - level: 2
+        text: "The /usr/local/bin/python3 binary has the SUID bit set. Python can be used to change the effective UID and execute commands as root."
+      - level: 3
+        text: "Execute via SSTI: python3 -c 'import os; os.setuid(0); os.system(\"cat /root/root.txt\")' -- use your RCE payload to run this command."
+
+par_time_minutes: 75
+
+docker:
+  compose_file: "docker-compose.yml"
+  build_required: true
