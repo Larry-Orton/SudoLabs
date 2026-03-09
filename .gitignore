@@ -15,3 +15,9 @@ env/
 *.log
 .pytest_cache/
 .mypy_cache/
+.claude/
+
+# VPN / sensitive credentials
+*.ovpn
+*.conf
+machines_*
