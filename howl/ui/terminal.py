@@ -133,9 +133,6 @@ class FixedBar:
 
         cols, _, scroll_end = self._dims()
 
-        # Re-apply scroll region (handles terminal resize)
-        sys.stdout.write(f"\033[1;{scroll_end}r")
-
         # Draw / refresh the bar
         self._render()
 
@@ -143,6 +140,11 @@ class FixedBar:
         r3 = scroll_end + 3
         prefix_len = len(self.prompt_label) + 6  # "  label > "
         sys.stdout.write(f"\033[{r3};{prefix_len}H\033[K")
+
+        # Temporarily reset scroll region so long/wrapped input
+        # doesn't corrupt the fixed bar rows
+        sys.stdout.write("\033[r")
+        sys.stdout.write(f"\033[{r3};{prefix_len}H")
         sys.stdout.flush()
 
         try:
@@ -150,13 +152,65 @@ class FixedBar:
         except (EOFError, KeyboardInterrupt):
             user_input = ""
 
-        # Long input may have wrapped and corrupted the bar rows.
-        # Re-render to self-heal, then reposition into the scroll area.
+        # If the user pasted multi-line text, extra lines are sitting
+        # in stdin waiting to be interpreted as commands.  Drain them
+        # and append to the input so nothing is lost / misinterpreted.
+        extra = self._drain_stdin()
+        if extra:
+            user_input = user_input + " " + " ".join(extra)
+
+        # Restore scroll region and aggressively re-render
+        sys.stdout.write(f"\033[1;{scroll_end}r")
+
+        # Clear any visual corruption in the bar area
+        for row in range(scroll_end + 1, scroll_end + self.BAR_HEIGHT + 1):
+            sys.stdout.write(f"\033[{row};1H\033[2K")
+
         self._render()
         sys.stdout.write(f"\033[{scroll_end};1H")
         sys.stdout.flush()
 
         return user_input
+
+    @staticmethod
+    def _drain_stdin() -> list[str]:
+        """Drain any buffered lines from a multi-line paste.
+
+        After input() reads one line, remaining pasted lines sit in
+        stdin's buffer.  We grab them here so they don't get fed to the
+        command loop as garbage.
+        """
+        lines: list[str] = []
+        if os.name == "nt":
+            try:
+                import msvcrt
+                # On Windows, drain character-by-character
+                buf = ""
+                while msvcrt.kbhit():
+                    ch = msvcrt.getwch()
+                    if ch in ("\r", "\n"):
+                        if buf.strip():
+                            lines.append(buf.strip())
+                        buf = ""
+                    else:
+                        buf += ch
+                if buf.strip():
+                    lines.append(buf.strip())
+            except Exception:
+                pass
+        else:
+            try:
+                import select as _sel
+                while _sel.select([sys.stdin], [], [], 0.0)[0]:
+                    line = sys.stdin.readline()
+                    if not line:
+                        break
+                    stripped = line.strip()
+                    if stripped:
+                        lines.append(stripped)
+            except Exception:
+                pass
+        return lines
 
     def _fallback_input(self) -> str:
         """Non-ANSI fallback using Rich panels."""
