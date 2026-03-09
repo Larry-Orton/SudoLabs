@@ -82,7 +82,7 @@ def _get_walkthrough_info(session: HtbSession, extra_query: str = "") -> str | N
         return None
 
 
-def _run_shell_command(cmd: str, command_history: list[dict]) -> None:
+def _run_shell_command(cmd: str, command_history: list[dict], ai: AIHelper | None = None) -> None:
     """Run a shell command, display output, and store it in command history."""
     console.print(f"  [dim]$ {cmd}[/dim]\n")
     try:
@@ -102,6 +102,10 @@ def _run_shell_command(cmd: str, command_history: list[dict]) -> None:
         command_history.append({"cmd": cmd, "output": truncated})
         if len(command_history) > 10:
             command_history.pop(0)
+
+        # Feed into AI conversation memory
+        if ai:
+            ai.add_command(cmd, truncated)
 
     except subprocess.TimeoutExpired:
         console.print("  [red]Command timed out (5 min limit).[/red]")
@@ -176,7 +180,13 @@ def htb_hunt_loop(session: HtbSession):
                 _handle_scan(session, arg)
 
             elif cmd == "milestone":
+                prev_phase = session.current_phase
                 _handle_milestone(session, arg)
+                if session.current_phase != prev_phase:
+                    ai.add_event(
+                        f"Milestone reached: '{session.current_phase}'. "
+                        f"Student advanced from phase '{prev_phase}'."
+                    )
                 _redraw(show_last_output=False)
 
             elif cmd == "hint":
@@ -281,7 +291,7 @@ def htb_hunt_loop(session: HtbSession):
 
             else:
                 # Pass unrecognized input to the system shell
-                _run_shell_command(user_input.strip(), command_history)
+                _run_shell_command(user_input.strip(), command_history, ai=ai)
 
     finally:
         bar.deactivate()
@@ -446,15 +456,25 @@ def _handle_hint(session: HtbSession, ai: AIHelper, level: int, command_history:
 
     try:
         client = ai._get_client()
+        # Build messages with conversation history for multi-turn memory
+        messages = list(ai.conversation)
+        messages.append({"role": "user", "content": prompt})
+
         with console.status("[bold blue]Thinking...[/bold blue]"):
             response = client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=600,
                 system=HTB_SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": prompt}],
+                messages=messages,
             )
         hint_text = response.content[0].text
         session.record_hint()
+
+        # Store in conversation memory
+        ai.conversation.append({"role": "user", "content": prompt})
+        ai.conversation.append({"role": "assistant", "content": hint_text})
+        ai._trim_history()
+
         hint_panel(hint_text, level, "N/A (HTB mode)")
     except Exception as e:
         console.print(f"  [red]AI Helper error: {e}[/red]")
@@ -498,14 +518,25 @@ def _handle_ask(session: HtbSession, ai: AIHelper, question: str, command_histor
 
     try:
         client = ai._get_client()
+        # Build messages with conversation history for multi-turn memory
+        messages = list(ai.conversation)
+        messages.append({"role": "user", "content": prompt})
+
         with console.status("[bold blue]Thinking...[/bold blue]"):
             response = client.messages.create(
                 model="claude-sonnet-4-20250514",
                 max_tokens=800,
                 system=HTB_SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": prompt}],
+                messages=messages,
             )
-        info_panel("AI Helper", response.content[0].text, border_style="blue")
+        reply = response.content[0].text
+
+        # Store in conversation memory
+        ai.conversation.append({"role": "user", "content": prompt})
+        ai.conversation.append({"role": "assistant", "content": reply})
+        ai._trim_history()
+
+        info_panel("AI Helper", reply, border_style="blue")
     except Exception as e:
         console.print(f"  [red]AI Helper error: {e}[/red]")
 

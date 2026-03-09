@@ -385,6 +385,11 @@ def _hunt_loop(session, container_info: dict | None):
 
                 if result["correct"]:
                     flag_panel(arg.strip(), result["stage_name"], result["points"])
+                    ai.add_event(
+                        f"Flag captured! Stage '{result['stage_name']}' complete. "
+                        f"+{result['points']} pts. "
+                        f"Now on stage {session.current_stage + 1}/{target.stage_count}."
+                    )
 
                     # Check achievements
                     session_data = {
@@ -529,6 +534,8 @@ def _hunt_loop(session, container_info: dict | None):
                     command_history.append({"cmd": full_cmd, "output": truncated})
                     if len(command_history) > 10:
                         command_history.pop(0)
+                    # Feed into AI conversation memory
+                    ai.add_command(full_cmd, truncated)
                 except _sp.TimeoutExpired:
                     console.print("  [red]Command timed out (5 min limit).[/red]")
                 except Exception as e:
