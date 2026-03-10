@@ -274,3 +274,43 @@ def get_total_time() -> int:
             "SELECT COALESCE(SUM(time_elapsed_secs), 0) as total FROM sessions WHERE status = 'completed'"
         ).fetchone()
         return row["total"] if row else 0
+
+
+# ── Notes ───────────────────────────────────────────────
+
+def save_note(
+    session_id: str,
+    target_slug: str,
+    raw_text: str,
+    formatted_text: str,
+    note_type: str = "user",
+    stage_name: str = "",
+):
+    """Save a note to the database."""
+    with get_db() as db:
+        db.execute(
+            """INSERT INTO notes
+               (session_id, target_slug, raw_text, formatted_text, note_type, stage_name)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (session_id, target_slug, raw_text, formatted_text, note_type, stage_name),
+        )
+
+
+def get_session_notes(session_id: str) -> list[dict]:
+    """Get all notes for a specific session."""
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT * FROM notes WHERE session_id = ? ORDER BY created_at",
+            (session_id,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def get_target_notes(target_slug: str) -> list[dict]:
+    """Get all notes for a target across all sessions."""
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT * FROM notes WHERE target_slug = ? ORDER BY created_at",
+            (target_slug,),
+        ).fetchall()
+        return [dict(row) for row in rows]

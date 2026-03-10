@@ -70,7 +70,21 @@ CREATE TABLE IF NOT EXISTS achievements (
     trigger_target  TEXT
 );
 
+CREATE TABLE IF NOT EXISTS notes (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id      TEXT NOT NULL,
+    target_slug     TEXT NOT NULL,
+    raw_text        TEXT NOT NULL,
+    formatted_text  TEXT NOT NULL,
+    note_type       TEXT NOT NULL DEFAULT 'user',
+    stage_name      TEXT NOT NULL DEFAULT '',
+    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (session_id) REFERENCES sessions(session_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_sessions_target ON sessions(target_slug);
 CREATE INDEX IF NOT EXISTS idx_sessions_status ON sessions(status);
 CREATE INDEX IF NOT EXISTS idx_stage_completions_session ON stage_completions(session_id);
 CREATE INDEX IF NOT EXISTS idx_hint_log_session ON hint_log(session_id);
+CREATE INDEX IF NOT EXISTS idx_notes_session ON notes(session_id);
+CREATE INDEX IF NOT EXISTS idx_notes_target ON notes(target_slug);

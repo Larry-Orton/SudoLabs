@@ -136,6 +136,18 @@ def htb_hunt_loop(session: HtbSession):
     last_output: list[str] = []
     command_history: list[dict] = []
 
+    # Smart notes manager
+    from sudolabs.notes import NoteManager, get_auto_notes_enabled
+    notes_mgr = NoteManager(
+        session_id=session.session_id,
+        target_slug=session.target_slug,
+        target_name=session.machine_name,
+        target_ip=session.machine_ip,
+        difficulty="htb",
+        ai=ai,
+    )
+    session._notes_mgr = notes_mgr  # For access in helper functions
+
     # Command bar shortcuts for HTB mode
     HTB_COMMANDS = [
         ("ask", "AI Help"),
@@ -240,14 +252,25 @@ def htb_hunt_loop(session: HtbSession):
                 if not arg:
                     arg = Prompt.ask("  [bold]Note[/bold]")
                 if arg:
-                    session.add_note(arg)
-                    console.print(f"  [green]Note saved.[/green]")
+                    session.add_note(arg)  # Keep in-memory list for backward compat
+                    if ai.is_available():
+                        with console.status("[bold green]Formatting note...[/bold green]"):
+                            formatted = notes_mgr.add_user_note(
+                                arg, session.current_phase, session.elapsed_formatted
+                            )
+                        info_panel("Note Saved", formatted, border_style="green")
+                    else:
+                        notes_mgr.add_user_note(arg, session.current_phase, session.elapsed_formatted)
+                        console.print("  [green]Note saved.[/green]")
 
             elif cmd == "notes":
-                if session.notes:
+                session_notes = notes_mgr.get_session_notes()
+                if session_notes:
                     console.print("\n  [bold]Session Notes:[/bold]")
-                    for i, note in enumerate(session.notes, 1):
-                        console.print(f"  {i}. {note}")
+                    for i, n in enumerate(session_notes, 1):
+                        tag = "[dim][auto][/dim] " if n["note_type"] == "auto" else ""
+                        console.print(f"  {i}. {tag}{n['raw_text']}")
+                    console.print()
                 else:
                     console.print("  [dim]No notes yet. Use 'note <text>' to add one.[/dim]")
 
@@ -278,8 +301,8 @@ def htb_hunt_loop(session: HtbSession):
                     "[bold]target[/bold]         Show target IP and services\n"
                     "[bold]status[/bold]         Refresh status header\n"
                     "[bold]clear[/bold]          Clear screen and redraw header\n"
-                    "[bold]note[/bold] <text>    Save a note\n"
-                    "[bold]notes[/bold]          View saved notes\n"
+                    "[bold green]note[/bold green] <text>   Save an AI-enhanced pentest note\n"
+                    "[bold green]notes[/bold green]          View all saved notes for this session\n"
                     "[bold]done[/bold]           Mark session complete\n"
                     "[bold]pause[/bold]          Pause session\n"
                     "[bold]abort[/bold]          Abandon session\n"
@@ -337,6 +360,17 @@ def _handle_scan(session: HtbSession, scan_type: str):
 
         console.print(f"\n  [dim]Scan results saved - the AI helper now knows about these services.[/dim]")
 
+        # Auto-note: scan results
+        if hasattr(session, '_notes_mgr'):
+            from sudolabs.notes import get_auto_notes_enabled
+            if get_auto_notes_enabled() and services:
+                port_list = ", ".join(
+                    f"{s['port']}/{s['protocol']} {s['service']}" for s in services
+                )
+                session._notes_mgr.add_auto_note(
+                    "nmap_services", scan_type=scan_type, port_list=port_list
+                )
+
         # Auto-search for exploit info on discovered services
         console.print(f"  [dim]Searching online for service-specific exploit info...[/dim]")
         from sudolabs.ai.websearch import search_exploit_info
@@ -389,6 +423,16 @@ def _handle_milestone(session: HtbSession, arg: str):
             f"[bold green]{MILESTONE_LABELS[ms]}[/bold green]\n"
             f"Time: {session.elapsed_formatted}"
         )
+
+        # Auto-note: milestone reached
+        if hasattr(session, '_notes_mgr'):
+            from sudolabs.notes import get_auto_notes_enabled
+            if get_auto_notes_enabled():
+                session._notes_mgr.add_auto_note(
+                    "milestone_reached",
+                    milestone_name=MILESTONE_LABELS[ms],
+                    elapsed=session.elapsed_formatted,
+                )
 
         if session.completed:
             console.print()
@@ -476,6 +520,14 @@ def _handle_hint(session: HtbSession, ai: AIHelper, level: int, command_history:
         ai._trim_history()
 
         hint_panel(hint_text, level, "N/A (HTB mode)")
+
+        # Auto-note: hint used
+        if hasattr(session, '_notes_mgr'):
+            from sudolabs.notes import get_auto_notes_enabled
+            if get_auto_notes_enabled():
+                session._notes_mgr.add_auto_note(
+                    "hint_used", level=level, phase=session.current_phase
+                )
     except Exception as e:
         console.print(f"  [red]AI Helper error: {e}[/red]")
 
@@ -557,9 +609,12 @@ def _display_htb_summary(session: HtbSession):
     if session.discovered_services:
         summary += f"[bold]Services Found:[/bold] {len(session.discovered_services)}\n"
 
-    if session.notes:
+    from sudolabs.db import queries as _q
+    session_notes = _q.get_session_notes(session.session_id)
+    user_notes = [n for n in session_notes if n["note_type"] == "user"]
+    if user_notes:
         summary += f"\n[bold]Notes:[/bold]\n"
-        for note in session.notes:
-            summary += f"  - {note}\n"
+        for n in user_notes:
+            summary += f"  - {n['raw_text']}\n"
 
     success_panel("HTB SESSION COMPLETE", summary)

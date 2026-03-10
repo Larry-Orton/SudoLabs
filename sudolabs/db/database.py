@@ -10,7 +10,7 @@ from sudolabs.config import DB_FILE, ensure_sudolabs_home
 SCHEMA_FILE = Path(__file__).parent / "schema.sql"
 
 # Current schema version — bump this when adding migrations.
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 # ---------------------------------------------------------------------------
 # Migration functions
@@ -30,8 +30,32 @@ def _migrate_v2(conn: sqlite3.Connection):
 # Ordered list of migration functions.  Each entry is (version, callable).
 # A migration runs when the DB is at a version lower than the entry's version.
 # Migrations receive a sqlite3.Connection and must NOT commit (caller does).
+def _migrate_v3(conn: sqlite3.Connection):
+    """Add notes table for smart note-taking system."""
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS notes (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id      TEXT NOT NULL,
+            target_slug     TEXT NOT NULL,
+            raw_text        TEXT NOT NULL,
+            formatted_text  TEXT NOT NULL,
+            note_type       TEXT NOT NULL DEFAULT 'user',
+            stage_name      TEXT NOT NULL DEFAULT '',
+            created_at      TEXT NOT NULL DEFAULT (datetime('now')),
+            FOREIGN KEY (session_id) REFERENCES sessions(session_id)
+        )
+    """)
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_notes_session ON notes(session_id)"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_notes_target ON notes(target_slug)"
+    )
+
+
 _MIGRATIONS: list[tuple[int, callable]] = [
     (2, _migrate_v2),
+    (3, _migrate_v3),
 ]
 
 

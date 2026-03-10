@@ -64,3 +64,29 @@ def set_username(name: str):
     config = load_config()
     config["username"] = name
     save_config(config)
+
+
+def get_notes_dir() -> str | None:
+    """Get the configured notes directory path."""
+    config = load_config()
+    return config.get("notes_dir")
+
+
+def set_notes_dir(path: str):
+    """Set the notes directory path."""
+    config = load_config()
+    config["notes_dir"] = path
+    save_config(config)
+
+
+def get_auto_notes() -> bool:
+    """Check if auto-notes are enabled (default: True)."""
+    config = load_config()
+    return config.get("auto_notes", True)
+
+
+def set_auto_notes(enabled: bool):
+    """Enable or disable auto-notes."""
+    config = load_config()
+    config["auto_notes"] = enabled
+    save_config(config)
