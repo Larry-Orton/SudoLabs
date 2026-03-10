@@ -94,17 +94,27 @@ class FixedBar:
         """Draw the two fixed rows below the scroll region."""
         cols, _, scroll_end = self._dims()
 
-        sys.stdout.write("\033[s")  # save cursor position
+        sys.stdout.write("\033[s")      # save cursor position
+        sys.stdout.write("\033[?7l")   # disable line wrap for bar
 
-        # Row 1: command shortcuts
+        # Row 1: command shortcuts — fit to terminal width
         r1 = scroll_end + 1
         sys.stdout.write(f"\033[{r1};1H\033[2K")
-        parts = []
-        for shortcut, label in self.commands:
-            parts.append(
+
+        parts_ansi: list[str] = []
+        used = 2  # leading indent
+        for i, (shortcut, label) in enumerate(self.commands):
+            # visible width: "[shortcut] label" + separator
+            vis_len = len(shortcut) + 2 + 1 + len(label)  # [x] label
+            sep = 3 if i > 0 else 0  # "   " between items
+            if used + sep + vis_len > cols - 1:
+                break  # no room — stop adding commands
+            parts_ansi.append(
                 f"\033[1;91m[{shortcut}]\033[0m \033[2m{label}\033[0m"
             )
-        sys.stdout.write(f"  {'   '.join(parts)}")
+            used += sep + vis_len
+
+        sys.stdout.write(f"  {'   '.join(parts_ansi)}")
 
         # Row 2: prompt prefix (input() fills the rest)
         r2 = scroll_end + 2
@@ -113,7 +123,8 @@ class FixedBar:
             f"  \033[1;91m{self.prompt_label}\033[0m \033[91m>\033[0m "
         )
 
-        sys.stdout.write("\033[u")  # restore cursor position
+        sys.stdout.write("\033[?7h")   # re-enable line wrap
+        sys.stdout.write("\033[u")     # restore cursor position
         sys.stdout.flush()
 
     # ------------------------------------------------------------------
