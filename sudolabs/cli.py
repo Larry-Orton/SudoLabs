@@ -762,31 +762,59 @@ def profile(
 
 
 def _show_profile():
-    """Internal profile display."""
-    prof = queries.get_profile()
-    stats = queries.get_completion_stats()
-    achievements = queries.get_all_achievements()
-    total_time_secs = queries.get_total_time()
-    total_hints = queries.get_total_hints_used()
+    """Internal profile display with interactive editing."""
+    while True:
+        prof = queries.get_profile()
+        stats = queries.get_completion_stats()
+        achievements = queries.get_all_achievements()
+        total_time_secs = queries.get_total_time()
+        total_hints = queries.get_total_hints_used()
 
-    total_completed = sum(stats["counts"].values())
-    total_targets = TargetRegistry().total_count
+        total_completed = sum(stats["counts"].values())
+        total_targets = TargetRegistry().total_count
 
-    hours, remainder = divmod(total_time_secs, 3600)
-    mins, _ = divmod(remainder, 60)
-    total_time_str = f"{hours}h {mins}m"
+        hours, remainder = divmod(total_time_secs, 3600)
+        mins, _ = divmod(remainder, 60)
+        total_time_str = f"{hours}h {mins}m"
 
-    render_profile(
-        username=get_username(),
-        rank=get_rank(prof["total_score"]),
-        total_score=prof["total_score"],
-        targets_completed=total_completed,
-        total_targets=total_targets,
-        total_time=total_time_str,
-        total_hints=total_hints,
-        achievements_count=len(achievements),
-        total_achievements=11,
-    )
+        render_profile(
+            username=get_username(),
+            rank=get_rank(prof["total_score"]),
+            total_score=prof["total_score"],
+            targets_completed=total_completed,
+            total_targets=total_targets,
+            total_time=total_time_str,
+            total_hints=total_hints,
+            achievements_count=len(achievements),
+            total_achievements=11,
+        )
+
+        console.print("  [bold bright_cyan][1][/bold bright_cyan] [dim]Change username[/dim]")
+        console.print("  [bold bright_cyan][2][/bold bright_cyan] [dim]Set API key[/dim]")
+        console.print("  [dim]Press Enter to go back[/dim]\n")
+
+        action = Prompt.ask("  [bold]Select option[/bold]", default="")
+
+        if action == "1":
+            current = get_username()
+            new_name = Prompt.ask(
+                f"  [bold]New username[/bold] [dim](current: {current})[/dim]",
+                default="",
+            )
+            if new_name.strip():
+                set_username(new_name.strip())
+                console.print(f"  [green]Username updated to: {new_name.strip()}[/green]\n")
+            else:
+                console.print(f"  [dim]Username unchanged.[/dim]\n")
+        elif action == "2":
+            new_key = Prompt.ask("  [bold]Anthropic API key[/bold]", default="")
+            if new_key.strip():
+                set_api_key(new_key.strip())
+                console.print(f"  [green]API key saved.[/green]\n")
+            else:
+                console.print(f"  [dim]API key unchanged.[/dim]\n")
+        else:
+            break
 
 
 @app.command()

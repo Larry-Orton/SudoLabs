@@ -12,7 +12,7 @@ MENU_OPTIONS = [
     ("2", "HTB Mode", "Hack an external machine (HackTheBox)", "bold bright_red"),
     ("3", "Targets", "Browse all available targets", "bold cyan"),
     ("4", "Score", "View your scores & achievements", "bold yellow"),
-    ("5", "Profile", "View your hunter profile", "bold green"),
+    ("5", "Profile", "View & edit your hunter profile", "bold green"),
     ("6", "AI Chat", "Talk to the AI helper", "bold blue"),
     ("7", "Doctor", "Check system readiness", "bold magenta"),
     ("8", "Config", "Settings & configuration", "dim"),
