@@ -149,15 +149,17 @@ class FixedBar:
         prefix_len = len(self.prompt_label) + 6  # "  label > "
         sys.stdout.write(f"\033[{r2};{prefix_len}H\033[K")
 
-        # Temporarily reset scroll region so the terminal's line
-        # editing (backspace, arrow keys) works on the prompt row.
-        # Without this, backspace shows ^? instead of deleting.
+        # Reset scroll region so input works on the prompt row.
         sys.stdout.write("\033[r")
         sys.stdout.write(f"\033[{r2};{prefix_len}H")
         sys.stdout.flush()
 
+        # Use character-by-character input to guarantee backspace
+        # works correctly.  Python's input() relies on the terminal's
+        # line editor which breaks when ANSI scroll regions are used
+        # (backspace shows ^? instead of deleting on WSL/many terms).
         try:
-            user_input = input()
+            user_input = self._read_line()
         except (EOFError, KeyboardInterrupt):
             user_input = ""
 
@@ -182,6 +184,101 @@ class FixedBar:
         sys.stdout.flush()
 
         return user_input
+
+    # ------------------------------------------------------------------
+    # Character-by-character input with explicit backspace handling
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _read_line() -> str:
+        """Read a line char-by-char with proper backspace support.
+
+        Replaces input() which breaks under ANSI scroll regions on
+        many terminals (WSL, Windows Terminal, etc.).
+        """
+        buf: list[str] = []
+
+        if os.name == "nt":
+            return FixedBar._read_line_win(buf)
+        return FixedBar._read_line_unix(buf)
+
+    @staticmethod
+    def _read_line_win(buf: list[str]) -> str:
+        """Windows: read via msvcrt (no echo, raw chars)."""
+        try:
+            import msvcrt
+        except ImportError:
+            return input()  # ultimate fallback
+
+        while True:
+            ch = msvcrt.getwch()
+            if ch in ("\r", "\n"):
+                sys.stdout.write("\r\n")
+                sys.stdout.flush()
+                return "".join(buf)
+            if ch in ("\x08", "\x7f"):          # BS / DEL
+                if buf:
+                    buf.pop()
+                    sys.stdout.write("\b \b")
+                    sys.stdout.flush()
+            elif ch == "\x03":                   # Ctrl+C
+                raise KeyboardInterrupt
+            elif ch in ("\x00", "\xe0"):          # extended key prefix
+                msvcrt.getwch()                   # consume scan code
+            elif ch >= " ":                       # printable
+                buf.append(ch)
+                sys.stdout.write(ch)
+                sys.stdout.flush()
+
+    @staticmethod
+    def _read_line_unix(buf: list[str]) -> str:
+        """Unix / WSL: read via tty cbreak mode (no echo, raw chars)."""
+        try:
+            import tty
+            import termios
+        except ImportError:
+            return input()  # fallback for non-tty environments
+
+        try:
+            fd = sys.stdin.fileno()
+        except Exception:
+            return input()
+
+        old = termios.tcgetattr(fd)
+        try:
+            tty.setcbreak(fd)
+            while True:
+                ch = sys.stdin.read(1)
+                if not ch or ch in ("\r", "\n"):
+                    sys.stdout.write("\r\n")
+                    sys.stdout.flush()
+                    return "".join(buf)
+                if ch in ("\x7f", "\x08"):       # DEL / BS
+                    if buf:
+                        buf.pop()
+                        sys.stdout.write("\b \b")
+                        sys.stdout.flush()
+                elif ch == "\x03":               # Ctrl+C
+                    raise KeyboardInterrupt
+                elif ch == "\x04":               # Ctrl+D
+                    if not buf:
+                        raise EOFError
+                elif ch == "\x15":               # Ctrl+U — kill line
+                    if buf:
+                        sys.stdout.write("\b \b" * len(buf))
+                        sys.stdout.flush()
+                        buf.clear()
+                elif ch == "\x1b":               # escape sequence
+                    # Eat arrow-key / function-key sequences
+                    import select as _sel
+                    while _sel.select([sys.stdin], [], [], 0.05)[0]:
+                        sys.stdin.read(1)
+                elif ch >= " ":                  # printable
+                    buf.append(ch)
+                    sys.stdout.write(ch)
+                    sys.stdout.flush()
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old)
 
     @staticmethod
     def _drain_stdin() -> list[str]:
