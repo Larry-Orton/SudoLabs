@@ -11,6 +11,7 @@ from rich.prompt import Prompt
 
 from sudolabs.config import (
     SUDOLABS_HOME,
+    PROJECT_ROOT,
     get_notes_dir,
     set_notes_dir,
     get_auto_notes,
@@ -95,18 +96,54 @@ Keep the note under 8 lines and the playbook entry under 5 lines. Be concise."""
 # ---------------------------------------------------------------------------
 
 def _resolve_notes_dir() -> Path:
-    """Get or prompt for the notes directory, saving the choice to config."""
+    """Get or prompt for the notes directory, saving the choice to config.
+
+    Uses a safe default that works across WSL, Windows, and Linux.
+    Falls back gracefully if the chosen path is not writable.
+    """
     configured = get_notes_dir()
     if configured:
-        return Path(configured)
+        p = Path(configured)
+        # Validate the previously-saved path is still usable
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+            return p
+        except OSError:
+            # Saved path is no longer valid — re-prompt
+            pass
 
-    default = str(SUDOLABS_HOME / "notes")
+    # Build a reliable default: prefer SUDOLABS_HOME, fall back to project dir
+    candidates = [
+        SUDOLABS_HOME / "notes",
+        PROJECT_ROOT / "notes",
+    ]
+    default = str(candidates[0])
+    for candidate in candidates:
+        try:
+            candidate.mkdir(parents=True, exist_ok=True)
+            default = str(candidate)
+            break
+        except OSError:
+            continue
+
     console.print()
     choice = Prompt.ask(
         "  [bold]Where should notes be saved?[/bold]",
         default=default,
     )
     path = Path(choice.strip()) if choice.strip() else Path(default)
+
+    # Validate the user's choice
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        # If even the user's choice fails, use project root as last resort
+        path = PROJECT_ROOT / "notes"
+        try:
+            path.mkdir(parents=True, exist_ok=True)
+        except OSError:
+            pass  # _ensure_files will handle this gracefully
+
     set_notes_dir(str(path))
     return path
 
@@ -145,13 +182,19 @@ class NoteManager:
         self.target_ip = target_ip
         self.difficulty = difficulty
         self.ai = ai  # AIHelper instance (can be None)
+        self._files_ok = False  # Track whether .md file I/O works
 
-        self.notes_dir = _resolve_notes_dir()
-        safe_slug = target_slug.replace(":", "-").replace(" ", "-")
-        self.target_file = self.notes_dir / f"{safe_slug}.md"
-        self.playbook_file = self.notes_dir / "playbook.md"
-
-        self._ensure_files()
+        try:
+            self.notes_dir = _resolve_notes_dir()
+            safe_slug = target_slug.replace(":", "-").replace(" ", "-")
+            self.target_file = self.notes_dir / f"{safe_slug}.md"
+            self.playbook_file = self.notes_dir / "playbook.md"
+            self._ensure_files()
+        except Exception:
+            # Notes directory is unusable — still save to DB, skip .md files
+            self.notes_dir = None
+            self.target_file = None
+            self.playbook_file = None
 
     # ── File initialization ────────────────────────────────
 
@@ -177,6 +220,8 @@ class NoteManager:
                 "*Reusable techniques extracted from your hunts.*\n\n---\n\n",
                 encoding="utf-8",
             )
+
+        self._files_ok = True
 
     # ── User notes (AI-enhanced) ───────────────────────────
 
@@ -299,6 +344,8 @@ class NoteManager:
 
     def _append_to_target_file(self, markdown_block: str):
         """Append a markdown block to the target notes file."""
+        if not self._files_ok:
+            return
         try:
             with open(self.target_file, "a", encoding="utf-8") as f:
                 f.write(f"\n{markdown_block}\n\n---\n")
@@ -307,6 +354,8 @@ class NoteManager:
 
     def _append_to_playbook(self, entry: str):
         """Append a technique entry to the global playbook."""
+        if not self._files_ok:
+            return
         try:
             source_line = (
                 f"- *Source: {self.target_slug} "
