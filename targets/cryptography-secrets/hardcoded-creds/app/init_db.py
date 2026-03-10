@@ -87,7 +87,7 @@ def initialize():
             with open("/root/root.txt", "r") as f:
                 root_flag = f.read().strip()
         except Exception:
-            root_flag = "HOWL{placeholder_root_flag}"
+            root_flag = "SUDO{placeholder_root_flag}"
 
         cursor.executemany(
             "INSERT INTO secrets (secret_key, secret_value, description) VALUES (%s, %s, %s)",

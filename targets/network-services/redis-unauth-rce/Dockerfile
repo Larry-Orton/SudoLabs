@@ -41,21 +41,21 @@ COPY app/init_redis.py /var/www/app/init_redis.py
 # ------------------------------------------------------------------
 
 # Stage 1 - Recon flag
-RUN echo "HOWL{placeholder_recon_flag}" > /var/www/app/.debug/recon_flag.txt && \
+RUN echo "SUDO{placeholder_recon_flag}" > /var/www/app/.debug/recon_flag.txt && \
     chmod 644 /var/www/app/.debug/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/redis/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/redis/user.txt && \
     chown redis:redis /home/redis/user.txt && \
     chmod 644 /home/redis/user.txt
 
 # Stage 3 - SSH injection flag
 RUN mkdir -p /opt/cacheflow && \
-    echo "HOWL{placeholder_ssh_flag}" > /opt/cacheflow/ssh_flag.txt && \
+    echo "SUDO{placeholder_ssh_flag}" > /opt/cacheflow/ssh_flag.txt && \
     chmod 644 /opt/cacheflow/ssh_flag.txt
 
 # Stage 4 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # Privilege escalation vector: redis user can run redis-cli as root

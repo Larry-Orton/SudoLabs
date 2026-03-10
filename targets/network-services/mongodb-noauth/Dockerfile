@@ -45,16 +45,16 @@ COPY app/templates/ /app/templates/
 # ------------------------------------------------------------------
 
 # Stage 1 - Recon flag
-RUN echo "HOWL{placeholder_recon_flag}" > /opt/datapulse/.internal/recon_flag.txt && \
+RUN echo "SUDO{placeholder_recon_flag}" > /opt/datapulse/.internal/recon_flag.txt && \
     chmod 644 /opt/datapulse/.internal/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/appuser/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/appuser/user.txt && \
     chown appuser:appuser /home/appuser/user.txt && \
     chmod 644 /home/appuser/user.txt
 
 # Stage 3 - Root flag (admin panel)
-RUN echo "HOWL{placeholder_root_flag}" > /opt/datapulse/admin_flag/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /opt/datapulse/admin_flag/root.txt && \
     chmod 644 /opt/datapulse/admin_flag/root.txt
 
 # Startup script

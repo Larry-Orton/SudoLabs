@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Howl - Cybersecurity Hacking Lab Installer
+# SudoLabs - Cybersecurity Hacking Lab Installer
 # One-command installation for Kali Linux / Debian / Ubuntu
 #
 
@@ -13,25 +13,25 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-HOWL_HOME="$HOME/.howl"
-HOWL_VENV="$HOWL_HOME/venv"
+SUDOLABS_HOME="$HOME/.sudolabs"
+SUDOLABS_VENV="$SUDOLABS_HOME/venv"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo ""
 echo -e "${RED}${BOLD}"
-echo '  ██╗  ██╗ ██████╗ ██╗    ██╗██╗     '
-echo '  ██║  ██║██╔═══██╗██║    ██║██║     '
-echo '  ███████║██║   ██║██║ █╗ ██║██║     '
-echo '  ██╔══██║██║   ██║██║███╗██║██║     '
-echo '  ██║  ██║╚██████╔╝╚███╔███╔╝███████╗'
-echo '  ╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝'
+echo '  ███████╗██╗   ██╗██████╗  ██████╗ ██╗      █████╗ ██████╗ ███████╗'
+echo '  ██╔════╝██║   ██║██╔══██╗██╔═══██╗██║     ██╔══██╗██╔══██╗██╔════╝'
+echo '  ███████╗██║   ██║██║  ██║██║   ██║██║     ███████║██████╔╝███████╗'
+echo '  ╚════██║██║   ██║██║  ██║██║   ██║██║     ██╔══██║██╔══██╗╚════██║'
+echo '  ███████║╚██████╔╝██████╔╝╚██████╔╝███████╗██║  ██║██████╔╝███████║'
+echo '  ╚══════╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝'
 echo -e "${NC}"
 echo -e "  ${CYAN}Cybersecurity Hacking Lab${NC}"
 echo ""
 
 # ── Detect update vs fresh install ───────────────────────
 IS_UPDATE=false
-if [ -d "$HOWL_VENV" ] && [ -f "$HOWL_HOME/config.yaml" ]; then
+if [ -d "$SUDOLABS_VENV" ] && [ -f "$SUDOLABS_HOME/config.yaml" ]; then
     IS_UPDATE=true
     echo -e "  ${YELLOW}Existing installation detected — running update.${NC}"
     echo ""
@@ -101,35 +101,35 @@ fi
 
 # ── Create virtual environment ─────────────────────────────
 echo ""
-echo -e "  ${BOLD}Setting up Howl...${NC}"
+echo -e "  ${BOLD}Setting up SudoLabs...${NC}"
 
-mkdir -p "$HOWL_HOME"
+mkdir -p "$SUDOLABS_HOME"
 
-if [ ! -d "$HOWL_VENV" ]; then
+if [ ! -d "$SUDOLABS_VENV" ]; then
     echo -e "  Creating virtual environment..."
-    "$PYTHON" -m venv "$HOWL_VENV"
+    "$PYTHON" -m venv "$SUDOLABS_VENV"
 fi
 
 # ── Install dependencies ──────────────────────────────────
 echo -e "  Installing dependencies..."
-"$HOWL_VENV/bin/pip" install --quiet --upgrade pip
-"$HOWL_VENV/bin/pip" install --quiet -r "$SCRIPT_DIR/requirements.txt"
+"$SUDOLABS_VENV/bin/pip" install --quiet --upgrade pip
+"$SUDOLABS_VENV/bin/pip" install --quiet -r "$SCRIPT_DIR/requirements.txt"
 
-# ── Install Howl package ──────────────────────────────────
-echo -e "  Installing Howl..."
-"$HOWL_VENV/bin/pip" install --quiet -e "$SCRIPT_DIR"
+# ── Install SudoLabs package ──────────────────────────────
+echo -e "  Installing SudoLabs..."
+"$SUDOLABS_VENV/bin/pip" install --quiet -e "$SCRIPT_DIR"
 
-# ── Create howl wrapper script ────────────────────────────
-HOWL_BIN="$HOME/.local/bin/howl"
-mkdir -p "$(dirname "$HOWL_BIN")"
+# ── Create sudolabs wrapper script ────────────────────────
+SUDOLABS_BIN="$HOME/.local/bin/sudolabs"
+mkdir -p "$(dirname "$SUDOLABS_BIN")"
 
-cat > "$HOWL_BIN" << 'WRAPPER'
+cat > "$SUDOLABS_BIN" << 'WRAPPER'
 #!/bin/bash
-HOWL_VENV="$HOME/.howl/venv"
-exec "$HOWL_VENV/bin/python" -m howl "$@"
+SUDOLABS_VENV="$HOME/.sudolabs/venv"
+exec "$SUDOLABS_VENV/bin/python" -m sudolabs "$@"
 WRAPPER
 
-chmod +x "$HOWL_BIN"
+chmod +x "$SUDOLABS_BIN"
 
 # ── Check PATH ─────────────────────────────────────────────
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -143,13 +143,13 @@ if [ "$IS_UPDATE" = false ]; then
     echo ""
     echo -e "  ${BOLD}AI Helper Setup (optional)${NC}"
     echo -e "  The AI helper uses Anthropic's Claude API for intelligent hints."
-    echo -e "  You can set this up later with: ${CYAN}howl config --set-api-key${NC}"
+    echo -e "  You can set this up later with: ${CYAN}sudolabs config --set-api-key${NC}"
     echo ""
     read -p "  Enter your Anthropic API key (or press Enter to skip): " api_key
 
     if [ -n "$api_key" ]; then
-        "$HOWL_VENV/bin/python" -c "
-from howl.config import set_api_key
+        "$SUDOLABS_VENV/bin/python" -c "
+from sudolabs.config import set_api_key
 set_api_key('$api_key')
 print('  API key saved.')
 "
@@ -158,8 +158,8 @@ fi
 
 # ── Run database migrations ──────────────────────────────
 echo -e "  Running database migrations..."
-"$HOWL_VENV/bin/python" -c "
-from howl.db.database import init_db
+"$SUDOLABS_VENV/bin/python" -c "
+from sudolabs.db.database import init_db
 init_db()
 print('  Done.')
 " 2>/dev/null || true
@@ -170,16 +170,16 @@ if [ "$IS_UPDATE" = true ]; then
     echo -e "  ${GREEN}${BOLD}Update complete!${NC}"
     echo ""
     echo -e "  Your progress and settings have been preserved."
-    echo -e "  Run ${CYAN}${BOLD}howl${NC} to continue hunting."
+    echo -e "  Run ${CYAN}${BOLD}sudolabs${NC} to continue hunting."
 else
     echo -e "  ${GREEN}${BOLD}Installation complete!${NC}"
     echo ""
-    echo -e "  Run ${CYAN}${BOLD}howl${NC} to start hunting."
-    echo -e "  Run ${CYAN}howl doctor${NC} to verify your setup."
-    echo -e "  Run ${CYAN}howl targets${NC} to browse available targets."
+    echo -e "  Run ${CYAN}${BOLD}sudolabs${NC} to start hunting."
+    echo -e "  Run ${CYAN}sudolabs doctor${NC} to verify your setup."
+    echo -e "  Run ${CYAN}sudolabs targets${NC} to browse available targets."
 fi
 echo ""
-echo -e "  Update anytime with: ${CYAN}howl update${NC} or ${CYAN}./install.sh${NC}"
+echo -e "  Update anytime with: ${CYAN}sudolabs update${NC} or ${CYAN}./install.sh${NC}"
 echo ""
-echo -e "  ${RED}${BOLD}The hunt begins now.${NC}"
+echo -e "  ${RED}${BOLD}Your terminal. Your lab. Get root.${NC}"
 echo ""

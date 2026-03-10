@@ -11,7 +11,7 @@ venv/
 env/
 .env
 *.db
-.howl/
+.sudolabs/
 *.log
 .pytest_cache/
 .mypy_cache/

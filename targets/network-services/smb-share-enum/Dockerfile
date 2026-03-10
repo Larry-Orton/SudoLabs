@@ -86,16 +86,16 @@ EOF
 
 # Stage 1 - Recon flag
 RUN mkdir -p /opt/howl && \
-    echo "HOWL{placeholder_recon_flag}" > /opt/howl/recon_flag.txt && \
+    echo "SUDO{placeholder_recon_flag}" > /opt/howl/recon_flag.txt && \
     chmod 644 /opt/howl/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/smbuser/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/smbuser/user.txt && \
     chown smbuser:smbuser /home/smbuser/user.txt && \
     chmod 644 /home/smbuser/user.txt
 
 # Stage 3 - Root flag (in finance confidential share)
-RUN echo "HOWL{placeholder_root_flag}" > /srv/samba/finance/confidential/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /srv/samba/finance/confidential/root.txt && \
     chown finance_user:finance_user /srv/samba/finance/confidential/root.txt && \
     chmod 640 /srv/samba/finance/confidential/root.txt
 

@@ -45,20 +45,20 @@ COPY app/ .
 
 # Stage 1 - Recon flag
 RUN mkdir -p /var/www/.config && \
-    echo "HOWL{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
+    echo "SUDO{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
     chmod 644 /var/www/.config/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/preload/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/preload/user.txt && \
     chown preload:preload /home/preload/user.txt && \
     chmod 644 /home/preload/user.txt
 
 # Stage 3 - Privesc discovery flag
-RUN echo "HOWL{placeholder_privesc_flag}" > /opt/.privesc_flag.txt && \
+RUN echo "SUDO{placeholder_privesc_flag}" > /opt/.privesc_flag.txt && \
     chmod 644 /opt/.privesc_flag.txt
 
 # Stage 4 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # ----- Vulnerability: sudo with env_keep for LD_PRELOAD -----

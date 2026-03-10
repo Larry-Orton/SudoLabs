@@ -49,20 +49,20 @@ RUN echo "/home/devops *(rw,sync,no_subtree_check)" > /etc/exports && \
 # ------------------------------------------------------------------
 
 # Stage 1 - Recon flag
-RUN echo "HOWL{placeholder_recon_flag}" > /opt/ironclad/.nfs_config/recon_flag.txt && \
+RUN echo "SUDO{placeholder_recon_flag}" > /opt/ironclad/.nfs_config/recon_flag.txt && \
     chmod 644 /opt/ironclad/.nfs_config/recon_flag.txt
 
 # Stage 2 - User flag (in devops home, accessible via NFS)
-RUN echo "HOWL{placeholder_user_flag}" > /home/devops/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/devops/user.txt && \
     chown devops:devops /home/devops/user.txt && \
     chmod 644 /home/devops/user.txt
 
 # Stage 3 - SSH access flag
-RUN echo "HOWL{placeholder_ssh_flag}" > /opt/ironclad/internal/ssh_flag.txt && \
+RUN echo "SUDO{placeholder_ssh_flag}" > /opt/ironclad/internal/ssh_flag.txt && \
     chmod 644 /opt/ironclad/internal/ssh_flag.txt
 
 # Stage 4 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # Startup script

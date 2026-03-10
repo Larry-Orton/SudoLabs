@@ -22,16 +22,16 @@ COPY app/ /app/
 
 # Stage 1 - Recon flag
 RUN mkdir -p /var/www/html/.status && \
-    echo "HOWL{placeholder_recon_flag}" > /var/www/html/.status/recon_flag.txt && \
+    echo "SUDO{placeholder_recon_flag}" > /var/www/html/.status/recon_flag.txt && \
     chmod 644 /var/www/html/.status/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/webapp/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/webapp/user.txt && \
     chown webapp:webapp /home/webapp/user.txt && \
     chmod 644 /home/webapp/user.txt
 
 # Stage 3 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 RUN mkdir -p /app/data && chown webapp:webapp /app/data

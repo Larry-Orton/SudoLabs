@@ -163,20 +163,20 @@ COPY app/ .
 
 # Stage 1 - Recon flag
 RUN mkdir -p /var/www/.config && \
-    echo "HOWL{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
+    echo "SUDO{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
     chmod 644 /var/www/.config/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/kerneluser/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/kerneluser/user.txt && \
     chown kerneluser:kerneluser /home/kerneluser/user.txt && \
     chmod 644 /home/kerneluser/user.txt
 
 # Stage 3 - Kernel discovery flag
-RUN echo "HOWL{placeholder_kernel_flag}" > /opt/.kernel_flag.txt && \
+RUN echo "SUDO{placeholder_kernel_flag}" > /opt/.kernel_flag.txt && \
     chmod 644 /opt/.kernel_flag.txt
 
 # Stage 4 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # Startup script

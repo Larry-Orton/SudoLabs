@@ -21,16 +21,16 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Stage 1 - Reconnaissance flag
 RUN mkdir -p /var/www/.config && \
-    echo "HOWL{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
+    echo "SUDO{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
     chmod 644 /var/www/.config/recon_flag.txt
 
 # Stage 2 - Verb tampering flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/webapp/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/webapp/user.txt && \
     chown webapp:webapp /home/webapp/user.txt && \
     chmod 644 /home/webapp/user.txt
 
 # Stage 3 - Root flag (admin data extraction)
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # Ensure app files are owned by webapp

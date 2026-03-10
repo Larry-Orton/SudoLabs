@@ -36,16 +36,16 @@ COPY app/ .
 
 # Stage 1 - Recon flag
 RUN mkdir -p /var/www/.config && \
-    echo "HOWL{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
+    echo "SUDO{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
     chmod 644 /var/www/.config/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/monitor/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/monitor/user.txt && \
     chown monitor:monitor /home/monitor/user.txt && \
     chmod 644 /home/monitor/user.txt
 
 # Stage 3 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # ----- Vulnerability: world-writable cron script running as root -----

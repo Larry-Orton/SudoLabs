@@ -50,20 +50,20 @@ COPY app/ .
 
 # Stage 1 - Recon flag
 RUN mkdir -p /var/www/.config && \
-    echo "HOWL{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
+    echo "SUDO{placeholder_recon_flag}" > /var/www/.config/recon_flag.txt && \
     chmod 644 /var/www/.config/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/backupuser/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/backupuser/user.txt && \
     chown backupuser:backupuser /home/backupuser/user.txt && \
     chmod 644 /home/backupuser/user.txt
 
 # Stage 3 - Backup discovery flag
-RUN echo "HOWL{placeholder_backup_flag}" > /opt/.backup_flag.txt && \
+RUN echo "SUDO{placeholder_backup_flag}" > /opt/.backup_flag.txt && \
     chmod 644 /opt/.backup_flag.txt
 
 # Stage 4 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # ----- Vulnerability: root cron job with tar wildcard -----

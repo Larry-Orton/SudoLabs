@@ -39,7 +39,7 @@ def decrypt_data(hex_data):
 # Pre-encrypt some vault secrets
 def build_vault():
     """Build the encrypted vault data."""
-    root_flag = "HOWL{placeholder_root_flag}"
+    root_flag = "SUDO{placeholder_root_flag}"
     try:
         with open("/root/root.txt") as f:
             root_flag = f.read().strip()

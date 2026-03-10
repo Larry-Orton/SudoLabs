@@ -3,14 +3,14 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "howl"
+name = "sudolabs"
 version = "1.0.0"
-description = "Howl - Terminal Cybersecurity Hacking Lab"
+description = "SudoLabs - Terminal Cybersecurity Hacking Lab"
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
 authors = [
-    {name = "Howl Team"}
+    {name = "SudoLabs Team"}
 ]
 keywords = ["cybersecurity", "hacking", "lab", "ctf", "pentesting"]
 classifiers = [
@@ -30,7 +30,7 @@ dependencies = [
 ]
 
 [project.scripts]
-howl = "howl.cli:app"
+sudolabs = "sudolabs.cli:app"
 
 [tool.setuptools.packages.find]
-include = ["howl*"]
+include = ["sudolabs*"]

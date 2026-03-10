@@ -66,20 +66,20 @@ RUN chmod +x /opt/sentinel/netmon_agent.sh
 # ------------------------------------------------------------------
 
 # Stage 1 - Recon flag
-RUN echo "HOWL{placeholder_recon_flag}" > /opt/sentinel/.monitoring/recon_flag.txt && \
+RUN echo "SUDO{placeholder_recon_flag}" > /opt/sentinel/.monitoring/recon_flag.txt && \
     chmod 644 /opt/sentinel/.monitoring/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/snmpuser/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/snmpuser/user.txt && \
     chown snmpuser:snmpuser /home/snmpuser/user.txt && \
     chmod 644 /home/snmpuser/user.txt
 
 # Stage 3 - Config flag
-RUN echo "HOWL{placeholder_config_flag}" > /opt/sentinel/config_flag.txt && \
+RUN echo "SUDO{placeholder_config_flag}" > /opt/sentinel/config_flag.txt && \
     chmod 644 /opt/sentinel/config_flag.txt
 
 # Stage 4 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # Privilege escalation vector: netmon can run find as root

@@ -78,23 +78,23 @@ COPY app/templates/ /app/templates/
 # ------------------------------------------------------------------
 
 # Stage 1 - Recon flag
-RUN echo "HOWL{placeholder_recon_flag}" > /var/www/portal/.hidden/recon_flag.txt && \
+RUN echo "SUDO{placeholder_recon_flag}" > /var/www/portal/.hidden/recon_flag.txt && \
     chmod 644 /var/www/portal/.hidden/recon_flag.txt
 
 # Stage 2 - VPN config analysis flag
-RUN echo "HOWL{placeholder_config_flag}" > /opt/obsidian/vpn/config_flag.txt && \
+RUN echo "SUDO{placeholder_config_flag}" > /opt/obsidian/vpn/config_flag.txt && \
     chmod 644 /opt/obsidian/vpn/config_flag.txt
 
 # Stage 3 - Certificate weakness flag
-RUN echo "HOWL{placeholder_cert_flag}" > /opt/obsidian/certs/cert_flag.txt && \
+RUN echo "SUDO{placeholder_cert_flag}" > /opt/obsidian/certs/cert_flag.txt && \
     chmod 644 /opt/obsidian/certs/cert_flag.txt
 
 # Stage 4 - SSRF pivot flag
-RUN echo "HOWL{placeholder_pivot_flag}" > /opt/obsidian/internal/pivot_flag.txt && \
+RUN echo "SUDO{placeholder_pivot_flag}" > /opt/obsidian/internal/pivot_flag.txt && \
     chmod 644 /opt/obsidian/internal/pivot_flag.txt
 
 # Stage 5 - Root flag (internal admin)
-RUN echo "HOWL{placeholder_root_flag}" > /opt/obsidian/admin/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /opt/obsidian/admin/root.txt && \
     chmod 644 /opt/obsidian/admin/root.txt
 
 # Startup script

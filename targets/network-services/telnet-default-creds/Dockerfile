@@ -54,16 +54,16 @@ COPY app/dashboard.py /app/dashboard.py
 # ------------------------------------------------------------------
 
 # Stage 1 - Recon flag (hidden in device system directory)
-RUN echo "HOWL{placeholder_recon_flag}" > /opt/device/.system/recon_flag.txt && \
+RUN echo "SUDO{placeholder_recon_flag}" > /opt/device/.system/recon_flag.txt && \
     chmod 644 /opt/device/.system/recon_flag.txt
 
 # Stage 2 - User flag (operator home)
-RUN echo "HOWL{placeholder_user_flag}" > /home/operator/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/operator/user.txt && \
     chown operator:operator /home/operator/user.txt && \
     chmod 644 /home/operator/user.txt
 
 # Stage 3 - Root flag (hidden in config backup)
-RUN echo "HOWL{placeholder_root_flag}" > /opt/device/backups/.config_backup/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /opt/device/backups/.config_backup/root.txt && \
     chmod 644 /opt/device/backups/.config_backup/root.txt
 
 # Allow telnet connections (remove securetty restrictions)

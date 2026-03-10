@@ -74,16 +74,16 @@ COPY app/web_server.py /app/web_server.py
 # ------------------------------------------------------------------
 
 # Stage 1 - Recon flag
-RUN echo "HOWL{placeholder_recon_flag}" > /var/www/html/.config/recon_flag.txt && \
+RUN echo "SUDO{placeholder_recon_flag}" > /var/www/html/.config/recon_flag.txt && \
     chmod 644 /var/www/html/.config/recon_flag.txt
 
 # Stage 2 - Zone transfer flag
 RUN mkdir -p /opt/dns && \
-    echo "HOWL{placeholder_zone_flag}" > /opt/dns/zone_flag.txt && \
+    echo "SUDO{placeholder_zone_flag}" > /opt/dns/zone_flag.txt && \
     chmod 644 /opt/dns/zone_flag.txt
 
 # Stage 3 - Root flag (hidden admin service)
-RUN echo "HOWL{placeholder_root_flag}" > /var/www/secret-admin/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /var/www/secret-admin/root.txt && \
     chmod 644 /var/www/secret-admin/root.txt
 
 # Startup script

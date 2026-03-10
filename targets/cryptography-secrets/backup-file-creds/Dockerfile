@@ -54,16 +54,16 @@ DB_CONN=postgresql://hr_dbadmin:HRdb_Pr0d!2024@localhost/meridianhr' > /app/sett
 
 # Stage 1 - Recon flag
 RUN mkdir -p /var/www/html/.maintenance && \
-    echo "HOWL{placeholder_recon_flag}" > /var/www/html/.maintenance/recon_flag.txt && \
+    echo "SUDO{placeholder_recon_flag}" > /var/www/html/.maintenance/recon_flag.txt && \
     chmod 644 /var/www/html/.maintenance/recon_flag.txt
 
 # Stage 2 - User flag
-RUN echo "HOWL{placeholder_user_flag}" > /home/webapp/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/webapp/user.txt && \
     chown webapp:webapp /home/webapp/user.txt && \
     chmod 644 /home/webapp/user.txt
 
 # Stage 3 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 EXPOSE 8080

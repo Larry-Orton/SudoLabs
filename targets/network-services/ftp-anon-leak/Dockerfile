@@ -61,16 +61,16 @@ COPY app/status_page.py /app/status_page.py
 # ------------------------------------------------------------------
 
 # Stage 1 - Recon flag (hidden in web status page directory)
-RUN echo "HOWL{placeholder_recon_flag}" > /var/www/html/.status/recon_flag.txt && \
+RUN echo "SUDO{placeholder_recon_flag}" > /var/www/html/.status/recon_flag.txt && \
     chmod 644 /var/www/html/.status/recon_flag.txt
 
 # Stage 2 - User flag (ftpuser home)
-RUN echo "HOWL{placeholder_user_flag}" > /home/ftpuser/user.txt && \
+RUN echo "SUDO{placeholder_user_flag}" > /home/ftpuser/user.txt && \
     chown ftpuser:ftpuser /home/ftpuser/user.txt && \
     chmod 644 /home/ftpuser/user.txt
 
 # Stage 3 - Root flag
-RUN echo "HOWL{placeholder_root_flag}" > /root/root.txt && \
+RUN echo "SUDO{placeholder_root_flag}" > /root/root.txt && \
     chmod 600 /root/root.txt
 
 # Privilege escalation vector: sysadmin can run cat as root
