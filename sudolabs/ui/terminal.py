@@ -148,12 +148,13 @@ class FixedBar:
         r2 = scroll_end + 2
         prefix_len = len(self.prompt_label) + 6  # "  label > "
         sys.stdout.write(f"\033[{r2};{prefix_len}H\033[K")
-        sys.stdout.flush()
 
-        # NOTE: We keep the scroll region active during input().
-        # Previously we reset it (\033[r]) which caused Enter to
-        # scroll the entire screen, burning bar content into the
-        # scroll area.  Keeping the region locked prevents that.
+        # Temporarily reset scroll region so the terminal's line
+        # editing (backspace, arrow keys) works on the prompt row.
+        # Without this, backspace shows ^? instead of deleting.
+        sys.stdout.write("\033[r")
+        sys.stdout.write(f"\033[{r2};{prefix_len}H")
+        sys.stdout.flush()
 
         try:
             user_input = input()
@@ -167,11 +168,12 @@ class FixedBar:
         if extra:
             user_input = user_input + " " + " ".join(extra)
 
-        # Re-assert scroll region (belt-and-suspenders)
+        # Restore scroll region immediately.
+        # Enter may have scrolled the full screen (cursor was on the
+        # last row with no scroll region), pushing old bar content
+        # into row scroll_end.  Clean that row AND the bar rows.
         sys.stdout.write(f"\033[1;{scroll_end}r")
 
-        # Clear the last scroll row AND bar rows — Enter may have
-        # pushed artifacts into scroll_end even with the region locked
         for row in range(scroll_end, scroll_end + self.BAR_HEIGHT + 1):
             sys.stdout.write(f"\033[{row};1H\033[2K")
 
